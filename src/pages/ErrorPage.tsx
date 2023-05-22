@@ -1,14 +1,33 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { Link } from "react-router-dom";
+import Header from "../components/Header";
+import { auth } from "../firebase";
 const ErrorPage = () => {
+
+  const [currentUser, setCurrentUser] = useState(auth.currentUser);
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      if (user) {
+        setCurrentUser(user);
+      } else {
+        console.log("no user");
+      }
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, [auth.currentUser]);
+  
   return (
-    <Wrapper className="page-100">
+    <Wrapper>
+      {currentUser && <Header />}
       <section>
         <h1>404</h1>
-        <h3>Sorry, there is no such a page</h3>
-        <Link to="/" className="btn">
-          Back Home
+        <h3>Page not found</h3>
+        <Link to="/search" className="btn">
+          Back to Search
         </Link>
       </section>
     </Wrapper>
@@ -16,17 +35,36 @@ const ErrorPage = () => {
 };
 
 const Wrapper = styled.main`
-  background: var(--clr-primary-10);
   display: flex;
   justify-content: center;
   align-items: center;
   text-align: center;
+  flex-direction: column;
+  min-height: fit-content;
+  section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+  }
   h1 {
-    font-size: 10rem;
+    font-size: 72px;
+    margin-top: 255px;
   }
   h3 {
-    text-transform: none;
-    margin-bottom: 2rem;
+    font-size: 16px;
+    color: var(--dark-grey-2);
+    margin-bottom: 19px;
+  }
+  .btn {
+    background-color: var(--light-blue);
+    text-decoration: none;
+    color: var(--black);
+    padding: 16px 35px;
+    font-weight: 700;
+    font-size: 12px;
+    border-radius: 24px;/* Add this line */
   }
 `;
 
