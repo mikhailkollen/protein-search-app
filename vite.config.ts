@@ -11,5 +11,8 @@ export default defineConfig({
       'src' : path.resolve(__dirname, './src')
     },
   },
+  build:{
+    chunkSizeWarningLimit: 4000,
+  },
   plugins: [react()],
 })

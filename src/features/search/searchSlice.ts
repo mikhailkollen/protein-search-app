@@ -82,13 +82,17 @@ export const searchSlice = createSlice({
         state.currentUser = action.payload;
       })
       .addCase(signUp.rejected, (state: SearchState, action) => {
-        state.error = action.error.message;
-        console.log(action.error.message);
+        if (action.error.code === "auth/email-already-in-use") {
+          state.error = "Email already in use";
+        } else {
+                  state.error = action.error.code;
+        }
+
       })
       .addCase(signOut.pending, (state) => {
         state.error = "";
       })
-      .addCase(signOut.fulfilled, (state: SearchState, action) => {
+      .addCase(signOut.fulfilled, (state: SearchState) => {
         state.currentUser = null;
       }).addCase(signOut.rejected, (state: SearchState, action) => {
         state.error = action.error.message;

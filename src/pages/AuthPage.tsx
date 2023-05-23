@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
-import { createUserWithEmailAndPassword, onAuthStateChanged, signInWithEmailAndPassword } from 'firebase/auth';
+import { onAuthStateChanged } from 'firebase/auth';
 import backgroundImg from '../assets/background-img.png'
 import { auth } from '../firebase';
-import { useAppDispatch } from "../app/hooks";
+import { useAppDispatch, useAppSelector } from "../app/hooks";
 import { setCurrentUser, signIn, signUp } from "../features/search/searchSlice";
 import { useNavigate } from 'react-router-dom';
 
@@ -16,6 +16,8 @@ const AuthPage = () => {
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
+
+  const authError = useAppSelector((state) => state.search.error);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -32,6 +34,12 @@ const AuthPage = () => {
     };
   }, [auth.currentUser]);
 
+  useEffect(() => {
+    if (authError) {
+      setError(authError);
+    }
+  }, [authError]);
+
   const handleSignIn = async (e: any) => {
     console.log('handleSignIn');
 
@@ -42,10 +50,12 @@ const AuthPage = () => {
         console.log(auth.currentUser);
         
         navigate('/search')
-      });
+      })
     } catch (err: any) {
       setError(err.message);
       console.log(err.message);
+      console.log('error during auth');
+      
     }
   };
 
@@ -88,10 +98,14 @@ const AuthPage = () => {
 
         <div className='btn-container'>
           <button type="submit">{isLogin ? "Login" : "Create Account"}</button>
-          <p>{auth.currentUser?.email}</p>
+          <p>
+            {error ? error : ''}
+          </p>
           <span>
             {isLogin ? "Don't have an account?" : "Already have an account?"}
-            <button type="button" onClick={() => setIsLogin(!isLogin)}>
+            <button type="button" onClick={() => {setIsLogin(!isLogin)
+            setError('')
+            }}>
               {isLogin ? "Sign up" : "Login"}
             </button>
           </span>

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import { useEffect } from 'react'
 import Header from '../components/Header'
 import styled from 'styled-components'
 import { onAuthStateChanged } from 'firebase/auth';
@@ -23,7 +23,7 @@ const SearchPage = () => {
         console.log('no user');
       }
     });
-  
+
     return () => {
       unsubscribe();
     };
@@ -35,23 +35,23 @@ const SearchPage = () => {
       <Header />
       <main>
         <form >
-        <input type="text" placeholder="Enter search value" />
-        <button type="submit">Search</button>
-        <button type="button">
-          <FiltersIcon />
-        </button>
-      </form>
-      {/* <p className='no-data-text'>
+          <input type="text" placeholder="Enter search value" />
+          <button type="submit">Search</button>
+          <button type="button">
+            <FiltersIcon />
+          </button>
+        </form>
+        {/* <p className='no-data-text'>
      No data to display <br /> Please start search to display results
     </p> */}
-      <div className='table-container'>
-        <TableViewWithReactQueryProvider/>
-        {/* <ExampleWithReactQueryProvider/> */}
+        <div className='table-container'>
+          <TableViewWithReactQueryProvider />
+          {/* <ExampleWithReactQueryProvider/> */}
 
-      </div>
-      
+        </div>
+
       </main>
-      
+
     </Wrapper>
   )
 }
@@ -101,7 +101,7 @@ const Wrapper = styled.section`
     }
 
     button[type="button"] {
-      height: fit-content;
+      height: 40px;
     }
     button:hover {
       background-color: var(--light-blue);
@@ -114,6 +114,12 @@ const Wrapper = styled.section`
     }
   .table-container {
     margin-top: 30px;
+    .organism-name {
+      background-color: var(--light-blue);
+      color: var(--dark);    
+      border-radius: 12px;
+      padding: 2px 12px;
+    }
   }
   }
 `

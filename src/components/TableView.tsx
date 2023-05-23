@@ -1,4 +1,4 @@
-import React, { UIEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { UIEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import MaterialReactTable, {
   MRT_ColumnDef,
   MRT_ColumnFiltersState,
@@ -53,6 +53,21 @@ const columns: MRT_ColumnDef<SearchResult>[] = [
   {
     accessorKey: 'organism',
     header: 'Organism',
+    accessorFn: (row) => (
+      <Typography variant="body2" 
+      sx={{
+        style: {
+          color: 'var(--dark)',
+          backgroundColor: 'var(--light-blue)',
+          borderRadius: '12px',
+          padding: '2px 12px',
+        }
+      }}
+      component="span" className='organism-name' 
+      >
+  {row.organism}
+</Typography>
+    ),
   },
   {
     accessorKey: 'subcellularLocation',
@@ -70,19 +85,27 @@ const columns: MRT_ColumnDef<SearchResult>[] = [
   const [columnFilters, setColumnFilters] = useState<MRT_ColumnFiltersState>([]);
   const [globalFilter, setGlobalFilter] = useState<string>('');
   const [sorting, setSorting] = useState<MRT_SortingState>([]);
-  const [url, setUrl] = useState<string>('');
   const [cursor, setCursor] = useState<string>("");
-  const [clickedCell, setClickedCell] = useState<string>('');
-  const handleCellClick = useCallback((entry: string) => {
-  console.log('clicked');
-  setClickedCell(entry);
-}, []);
+
+   const updateQueryParam = (params: URLSearchParams) => {
+    const search = params.toString();
+    navigate({ search });
+  };
 
   const { data, fetchNextPage, isError, isFetching, isLoading } = useInfiniteQuery<SearchApiResponse>({
     queryKey: ['table-data', columnFilters, globalFilter, sorting],
     queryFn: async () => {
       const query = globalFilter || '*';
+      setCursor('');
+      const queryParams = new URLSearchParams(window.location.search);
+      if (query === '*') {
+        queryParams.delete('query');
+      } else {
+        queryParams.set('query', query);
+      }
+
       const url = `https://rest.uniprot.org/uniprotkb/search?query=${query}&format=json&fields=accession,id,gene_names,organism_name,length,cc_subcellular_location&cursor=${cursor && cursor}&size=${fetchSize}`;
+      
 
       const response = await fetch(url);
       const link = response.headers.get('Link');
@@ -90,14 +113,41 @@ const columns: MRT_ColumnDef<SearchResult>[] = [
       setCursor(nextCursor);
 
       const json = await response.json();
-      console.log(json);
+      if (json.results === 0) {
+        return {
+          results: [],
+          totalResults: 0,
+        };
+      }
+      const results: SearchResult[] = json.results?.map((result: any) => {
+        const genes = result.genes?.map((gene: any) => {
+          if (gene.geneName)
+        {
+          return gene.geneName.value
+        } else {
+          return "N/A"
+        }
 
-      const results: SearchResult[] = json.results.map((result: any) => {
-        const genes = result.genes.map((gene: any) => gene.geneName.value).join(', ');
-        const subcellularLocations = result.comments
-          .filter((comment: any) => comment.commentType === 'SUBCELLULAR LOCATION')
-          .flatMap((comment: any) => comment.subcellularLocations.map((location: any) => location.location.value))
-          .join(', ');
+        } 
+        
+        ).join(', ');
+const subcellularLocations = result.comments?.filter((comment: any) => 
+    comment?.commentType === 'SUBCELLULAR LOCATION')
+  .flatMap((comment: any) => {
+    const sublocations = comment.subcellularLocations;
+    if (sublocations) {
+      return sublocations.map((location: any) => {
+        if (location?.location) {
+          return location.location.value
+        } else {
+          return "N/A"
+        }
+      });
+    } else {
+      return [];
+    }
+  })
+  .join(', ');
 
         return {
           entry: result.primaryAccession,
@@ -108,6 +158,8 @@ const columns: MRT_ColumnDef<SearchResult>[] = [
           length: result.sequence.length,
         };
       });
+
+      updateQueryParam(queryParams);
 
       return {
         results,
@@ -146,13 +198,15 @@ const columns: MRT_ColumnDef<SearchResult>[] = [
     [fetchNextPage, isFetching, totalFetched],
   );
 
-  useEffect(() => {
-    try {
+useEffect(() => {
+  try {
+    if (flatData.length > 0) {
       rowVirtualizerInstanceRef.current?.scrollToIndex?.(0);
-    } catch (error) {
-      console.error(error);
     }
-  }, [sorting, columnFilters, globalFilter]);
+  } catch (error) {
+    console.error(error);
+  }
+}, [sorting, columnFilters, globalFilter, flatData]);
 
   useEffect(() => {
     fetchMoreOnBottomReached(tableContainerRef.current);

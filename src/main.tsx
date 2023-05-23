@@ -13,19 +13,8 @@ import App from "./App.tsx"
 import { Provider } from "react-redux"
 import {store} from "./app/store"
 import { auth } from "./firebase";
-import { selectCurrentUser, setCurrentUser } from "./features/search/searchSlice";
 import SingleProteinPage from "./pages/SingleProteinPage";
 
- 
-
-  const unsubscribe = auth.onAuthStateChanged((user) => {
-    if (user) {
-
-      store.dispatch(setCurrentUser(user.email));
-    } else {
-      store.dispatch(setCurrentUser(null));
-    }
-  });
 
 
 
