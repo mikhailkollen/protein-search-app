@@ -1,23 +1,25 @@
 import { useEffect, useState } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
-import backgroundImg from '../assets/background-img.png'
+import backgroundImg from '../assets/background-img.png';
 import { auth } from '../firebase';
 import { useAppDispatch, useAppSelector } from "../app/hooks";
 import { setCurrentUser, signIn, signUp } from "../features/search/searchSlice";
 import { useNavigate } from 'react-router-dom';
-
 import styled from 'styled-components';
 
 const AuthPage = () => {
   const dispatch = useAppDispatch();
+
   const [isLogin, setIsLogin] = useState(true);
   const [password, setPassword] = useState('');
-  const [passwordConfirm, setPasswordConfirm] = useState('' as string | undefined);
+  const [passwordConfirm, setPasswordConfirm] = useState('');
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
-
   const authError = useAppSelector((state) => state.search.error);
+  
+
+  const [isFormValid, setIsFormValid] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -28,7 +30,7 @@ const AuthPage = () => {
         console.log('no user');
       }
     });
-  
+
     return () => {
       unsubscribe();
     };
@@ -40,28 +42,59 @@ const AuthPage = () => {
     }
   }, [authError]);
 
-  const handleSignIn = async (e: any) => {
-    console.log('handleSignIn');
+  useEffect(() => {
 
+    checkFormValidity();
+  }, [isLogin, email, password, passwordConfirm]);
+
+
+  const checkFormValidity = () => {
+    if (isLogin) {
+
+      setIsFormValid(email !== '' && password !== '');
+    } else {
+
+      setIsFormValid(email !== '' && password !== '' && password === passwordConfirm);
+    }
+  };
+
+  const handleSignIn = async (e: any) => {
     e.preventDefault();
     setError('');
+
+    if (!validateEmail(email)) {
+      setError('Please enter a valid email address');
+      return;
+    }
+
+    if (!validatePassword(password)) {
+      setError('Please enter a valid password (min. 6 characters)');
+      return;
+    }
+    
     try {
       await dispatch(signIn({ email, password })).then(()=> {
-        console.log(auth.currentUser);
-        
-        navigate('/search')
-      })
+        navigate('/search');
+      });
     } catch (err: any) {
       setError(err.message);
       console.log(err.message);
       console.log('error during auth');
-      
     }
   };
 
   const handleSignUp = async (e: any) => {
     e.preventDefault();
     setError('');
+    if (!validateEmail(email)) {
+      setError('Please enter a valid email address');
+      return;
+    }
+
+    if (!validatePassword(password)) {
+      setError('Please enter a valid password (min. 6 characters)');
+      return;
+    }
     if (password !== passwordConfirm) {
       setError('Passwords do not match');
       return;
@@ -74,49 +107,94 @@ const AuthPage = () => {
       console.log(err.message);
     }
   };
+
+
+  const handleEmailChange = (e: any) => {
+    setEmail(e.target.value);
+  };
+
+
+  const handlePasswordChange = (e: any) => {
+    setPassword(e.target.value);
+  };
+
+  const handlePasswordConfirmChange = (e: any) => {
+    setPasswordConfirm(e.target.value);
+  };
+
+
+  const validateEmail = (email: string) => {
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+
+  const validatePassword = (password: string) => {
+    return password.length >= 6;
+  };
+
   return (
     <Wrapper>
       <div>
         <h1>{isLogin ? "Login" : "Sign up"}</h1>
-      <form onSubmit={isLogin ? handleSignIn : handleSignUp}>
-        <label>
-          <p>Email</p>
-          <input type="email" required onChange={(e) => setEmail(e.target.value)} placeholder='Enter your email' />
-        </label>
-        <label>
-          <p>Password</p>
-          <input type="password" required onChange={(e) => setPassword(e.target.value)} placeholder='Enter your password' />
-        </label>
-        {
-          isLogin ? null : (
+        <form onSubmit={isLogin ? handleSignIn : handleSignUp}>
+          <label>
+            <p>Email</p>
+            <input
+              type="email"
+              required
+              onChange={handleEmailChange}
+              placeholder='Enter your email'
+              style={{ outline: error ? '1px solid var(--alert-red)' : '' }}
+            />
+          </label>
+          <label>
+            <p>Password</p>
+            <input
+              type="password"
+              required
+              onChange={handlePasswordChange}
+              placeholder='Enter your password'
+              style={{ outline: error ? '1px solid var(--alert-red)' : '' }}
+            />
+          </label>
+          {!isLogin && (
             <label>
               <p>Repeat Password</p>
-              <input type="password" required onChange={(e)=> setPasswordConfirm(e.target.value)} placeholder='Enter your password again' />
+              <input
+                type="password"
+                required
+                onChange={handlePasswordConfirmChange}
+                placeholder='Enter your password again'
+                style={{ outline: error ? '1px solid var(--alert-red)' : '' }}
+              />
             </label>
-          )
-        }
+          )}
 
-        <div className='btn-container'>
-          <button type="submit">{isLogin ? "Login" : "Create Account"}</button>
-          <p>
-            {error ? error : ''}
-          </p>
-          <span>
-            {isLogin ? "Don't have an account?" : "Already have an account?"}
-            <button type="button" onClick={() => {setIsLogin(!isLogin)
-            setError('')
-            }}>
-              {isLogin ? "Sign up" : "Login"}
+          <div className='btn-container'>
+            <button type="submit" disabled={!isFormValid}>
+              {isLogin ? "Login" : "Create Account"}
             </button>
-          </span>
-        </div>
-      </form>
+            <p className='error-message'>{error ? error : ''}</p>
+            <span>
+              {isLogin ? "Don't have an account?" : "Already have an account?"}
+              <button
+                type="button"
+                onClick={() => {
+                  setIsLogin(!isLogin);
+                  setError('');
+                }}
+              >
+                {isLogin ? "Sign up" : "Login"}
+              </button>
+            </span>
+          </div>
+        </form>
       </div>
-      
     </Wrapper>
   );
 };
-
 const Wrapper = styled.main`
   display: flex;
   flex-direction: column;
@@ -203,6 +281,13 @@ const Wrapper = styled.main`
   button[type='button'] {
     font-weight: 700;
     font-size: 12px;
+  }
+
+  .error-message {
+    margin: 17px 20px;
+    color: var(--alert-red);
+    font-size: 12px;
+    font-weight: 600;
   }
 `;
 

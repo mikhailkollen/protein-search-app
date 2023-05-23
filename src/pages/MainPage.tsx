@@ -1,24 +1,30 @@
 import styled from 'styled-components'
 import backgroundImg from '../assets/background-img.png'
-import { useCallback } from 'react'
+import { useCallback, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { onAuthStateChanged } from 'firebase/auth'
+import { auth } from '../firebase'
 
 const MainPage = () => {
   const navigate = useNavigate()
+
   const handleClick = useCallback(() => {
     navigate('/auth')
   }, [navigate])
-  // onAuthStateChanged(auth, (user) => {
-  //   if (user) {
-  //     console.log(user);
-      
-  //     dispatch(setCurrentUser(user.email));
-  //     navigate('/search');
-  //   } else {
-  //     dispatch(setCurrentUser(null));
-  //     navigate('/auth');
-  //   }
-  // });
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        navigate('/search')
+      } else {
+        console.log('no user');
+      }
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, [auth.currentUser]);
 
 
   return (
@@ -37,12 +43,17 @@ const Wrapper = styled.main`
   background-size: cover;
   width: 100%;
   height: 100vh;
+  position: relative;
   section {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    height: 100%;
+    position: absolute;
+    top: 35%;
+    left: 60%;
+    gap: 30px;
+    max-width: 400px;
     p {
       color: var(--dark-grey);
     }
@@ -52,6 +63,8 @@ const Wrapper = styled.main`
       border: none;
       padding: 16px 62px;
       color: var(--blue);
+      font-size: 14px;
+      font-weight: 600;
       cursor: pointer;
       transition: all 0.3s ease-in-out;
     }

@@ -71,7 +71,7 @@ const ProteinTabs: React.FC<ProteinTabsProps> = ({ data }) => {
   const [value, setValue] = React.useState(0);
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
-    console.log(event.target);
+    event.target!;
     setValue(newValue);
   };
   const [isCopied, setIsCopied] = React.useState(false);
@@ -113,11 +113,11 @@ const ProteinTabs: React.FC<ProteinTabsProps> = ({ data }) => {
         </div>
         <div className='sequence-container'>
           <p className='data-text'>{data.sequence}</p>
-          <button className='copy-btn' onClick={()=>{
+          <button className='copy-btn' onClick={() => {
             navigator.clipboard.writeText(data.sequence)
             setIsCopied(true)
           }}><CopyIcon /> <span>
-            {isCopied ? "Copied" : "Copy"}
+              {isCopied ? "Copied" : "Copy"}
             </span></button>
         </div>
       </TabPanel>
@@ -137,35 +137,35 @@ const Wrapper = styled.section`
   align-items: flex-start;
   width: 100%;
   .title {
-   color: var(--black);
-   font-size: 16px;
-   font-weight: 600;
+    color: var(--black);
+    font-size: 16px;
+    font-weight: 600;
     margin-bottom: 17px;
   }
   
 
   .data-title {
-   color: var(--dark-grey-3);
-   font-size: 12px;
-   font-weight: 600;
-   margin-bottom: 12px;
+    color: var(--dark-grey-3);
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 12px;
   }
 
   .data-text {
-   color: var(--black);
-   font-size: 12px;
-   font-weight: 400;
-   line-height: 16px;
+    color: var(--black);
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 16px;
   }
 
   .sequence-container {
-   width: 100%;
-   word-break: break-all;
-   background-color: var(--light-grey-2);
-   padding: 12px;
-   border-radius: 8px;
-   position: relative;
-   .copy-btn {
+    width: 100%;
+    word-break: break-all;
+    background-color: var(--light-grey-2);
+    padding: 12px;
+    border-radius: 8px;
+    position: relative;
+    .copy-btn {
     position: absolute;
     top: -25px;
     right: 0;
@@ -173,25 +173,25 @@ const Wrapper = styled.section`
     gap: 5px;
     font-weight: 600;
     align-items: center;
-   }
+    }
   }
   .flex-container {
-   display: flex;
-   flex-direction: row;
-   justify-content: space-between;
-   align-items: flex-start;
-   gap: 21px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 21px;
     width: 50%;
-   text-align: left;
-   .column {
+    text-align: left;
+    .column {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
     align-items: flex-start;
     width: 100%;
-   }
+    }
   }
- `
+  `
 
 
 
