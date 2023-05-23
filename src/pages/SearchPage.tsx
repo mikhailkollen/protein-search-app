@@ -36,7 +36,7 @@ const SearchPage = () => {
       <main>
         <form >
           <input type="text" placeholder="Enter search value" />
-          <button type="submit">Search</button>
+          <button type="button">Search</button>
           <button type="button">
             <FiltersIcon />
           </button>
