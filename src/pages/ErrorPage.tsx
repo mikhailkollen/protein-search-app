@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import styled from "styled-components";
 import { Link } from "react-router-dom";
 import Header from "../components/Header";
@@ -6,6 +6,7 @@ import { auth } from "../firebase";
 const ErrorPage = () => {
 
   const [currentUser, setCurrentUser] = useState(auth.currentUser);
+  
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
       if (user) {
@@ -51,6 +52,7 @@ const Wrapper = styled.main`
   h1 {
     font-size: 72px;
     margin-top: 255px;
+    font-weight: 600;
   }
   h3 {
     font-size: 16px;

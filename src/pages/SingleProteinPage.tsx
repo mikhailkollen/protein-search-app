@@ -6,7 +6,7 @@ import { onAuthStateChanged } from "firebase/auth";
 import { setCurrentUser } from "../features/search/searchSlice";
 import { auth } from "../firebase";
 import { useAppDispatch } from "../app/hooks";
-import { useNavigate, Navigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import ProteinTabs from "../components/ProteinTabs";
 
 const SingleProteinPage = () => {
@@ -44,27 +44,25 @@ const SingleProteinPage = () => {
 
   const url = `https://rest.uniprot.org/uniprotkb/${id}`;
   const [data, setData] = useState({} as any);
-  const [uniProtkbId, setUniProtkbId] = useState("");
-  const [description, setDescription] = useState("");
-  const [gene, setGene] = useState("");
 
-  const fetchSingleProtein = async (id: string) => {
-    const response = await fetch(url);
-    const responseData = await response.json();
-    setData({
-      uniProtkbId: responseData.uniProtkbId,
-      description: responseData.proteinDescription.recommendedName.fullName.value,
-      gene: responseData.genes[0].geneName.value,
-      length: responseData.sequence.length,
-      lastUpdated: responseData.entryAudit.lastAnnotationUpdateDate,
-      mass: responseData.sequence.molWeight,
-      checksum: responseData.sequence.crc64,
-      sequence: responseData.sequence.value,
-    });
-  };
-
+  const fetchSingleProtein = async () => {
+  const response = await fetch(url);
+  const responseData = await response.json();
+  setData({
+    accession: responseData.primaryAccession || "N/A",
+    uniProtkbId: responseData.uniProtkbId || "UniProtKB",
+    description: responseData.proteinDescription?.recommendedName?.fullName?.value || "N/A",
+    gene: responseData.genes?.[0]?.geneName?.value || "N/A", // Add a check for genes array
+    length: responseData.sequence?.length || "N/A",
+    lastUpdated: responseData.entryAudit?.lastAnnotationUpdateDate || "N/A",
+    mass: responseData.sequence?.molWeight || "N/A",
+    checksum: responseData.sequence?.crc64 || "N/A",
+    sequence: responseData.sequence?.value || "N/A",
+    organism: responseData.organism?.scientificName || "N/A",
+  });
+};
   useEffect(() => {
-    fetchSingleProtein(id!);
+    fetchSingleProtein();
   }, [id]);
 
 
@@ -76,13 +74,18 @@ const SingleProteinPage = () => {
           <header>
 
           
-          <h1>
-            {id} / {data.uniProtkbId}
-          </h1>
+          <div className="title-container">
+            <h1>
+              {id} / {data.uniProtkbId || "UniProtKB"}
+            </h1>
+            <span>
+      {data.organism || "Organism"}
+     </span>
+          </div>
           <h2>Protein</h2>
-          <p>{data.description}</p>
+          <p>{data.description || 'N/A'}</p>
           <h2>Gene</h2>
-          <p>{data.gene}</p>
+          <p>{data.gene || 'N/A'}</p>
           </header>
           <ProteinTabs data={data}/>
         </main>
@@ -101,16 +104,28 @@ const Wrapper = styled.section`
     flex-direction: column;
     align-items: flex-start;
     padding-left: 130px;
-    width: 80%;
     header {
       display: flex;
       flex-direction: column;
       align-items: flex-start;
       width: 100%;
+      .title-container {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 12px;
+        span {
+          background-color: var(--light-blue);
+          border-radius: 12px;
+          padding: 2px 12px;
+          margin-left: 13px;
+        }
+      }
     }
     h1 {
       font-size: 22px;
-      margin-bottom: 12px;
+      
     }
     h2 {
       color: var(--dark-grey-3);

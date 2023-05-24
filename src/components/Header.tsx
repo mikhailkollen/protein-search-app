@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import styled from 'styled-components'
 import { useNavigate } from 'react-router-dom'
 import { useAppDispatch } from '../app/hooks'
@@ -10,20 +10,16 @@ import { onAuthStateChanged } from 'firebase/auth'
 const Header = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const [userEmail, setUserEmail] = useState('' as string | undefined);
-    const handleSignOut =  () => {
+
+  const handleSignOut = () => {
     dispatch(signOut());
-    navigate('/')
   }
 
-      useEffect(() => {
-    
+  useEffect(() => {
+
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        setUserEmail(user.email!);
-      } else {
-        console.log('no user');
-        
+      if (!user) {
+        navigate('/')
       }
     });
 
@@ -36,10 +32,10 @@ const Header = () => {
 
   return (
     <Wrapper>
-     <div>
-       <p>{userEmail}</p>
-       <button onClick={handleSignOut}>Log out</button>
-     </div>
+      <div>
+        <p>{auth.currentUser?.email}</p>
+        <button onClick={handleSignOut}>Log out</button>
+      </div>
     </Wrapper>
   )
 }
