@@ -21,6 +21,7 @@ const SearchPage = () => {
         navigate('/search')
       } else {
         console.log('no user');
+        navigate('/auth')
       }
     });
 

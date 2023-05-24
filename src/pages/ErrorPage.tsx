@@ -6,6 +6,7 @@ import { auth } from "../firebase";
 const ErrorPage = () => {
 
   const [currentUser, setCurrentUser] = useState(auth.currentUser);
+  
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
       if (user) {
