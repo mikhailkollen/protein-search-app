@@ -1,40 +1,37 @@
-import { useEffect, useState } from 'react'
-import styled from 'styled-components'
-import { useNavigate } from 'react-router-dom'
-import { useAppDispatch } from '../app/hooks'
-import { signOut } from '../features/search/searchSlice'
-import { auth } from '../firebase'
-import { onAuthStateChanged } from 'firebase/auth'
+import { useEffect, useState } from "react"
+import { useNavigate } from "react-router-dom"
+import { onAuthStateChanged } from "firebase/auth"
+import styled from "styled-components"
 
+import { useAppDispatch } from "../app/hooks"
+import { signOut } from "../features/search/searchSlice"
+import { auth } from "../firebase"
 
 const Header = () => {
-  const dispatch = useAppDispatch();
-  const navigate = useNavigate();
+  const dispatch = useAppDispatch()
+  const navigate = useNavigate()
 
   const handleSignOut = () => {
-    dispatch(signOut());
+    dispatch(signOut())
   }
 
   useEffect(() => {
-
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (!user) {
-        navigate('/')
+        navigate("/")
       }
-    });
+    })
 
     return () => {
-      unsubscribe();
-    };
-  }, [auth.currentUser]);
-
-
+      unsubscribe()
+    }
+  }, [auth.currentUser])
 
   return (
     <Wrapper>
       <div>
         <p>{auth.currentUser?.email}</p>
-        <button onClick={handleSignOut}>Log out</button>
+        <button onClick={handleSignOut}>{"Log out"}</button>
       </div>
     </Wrapper>
   )
@@ -55,16 +52,15 @@ const Wrapper = styled.header`
     padding: 16px 0;
   }
   button {
-      border-radius: none;
-      padding: 0;
-      background-color: transparent;
-      border: none;
-      color: var(--greyish-blue);
-      margin-left: 30px;
-      cursor: pointer;
-      font-weight: 600;
-    }
-
+    border-radius: none;
+    padding: 0;
+    background-color: transparent;
+    border: none;
+    color: var(--greyish-blue);
+    margin-left: 30px;
+    cursor: pointer;
+    font-weight: 600;
+  }
 `
 
 export default Header

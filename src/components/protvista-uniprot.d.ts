@@ -1,11 +1,10 @@
-declare module 'protvista-uniprot' {
-  import React from 'react';
+declare module "protvista-uniprot" {
+  import React from "react"
 
   export interface ProtvistaUniprotProps {
-    accession: string;
-
+    accession: string
   }
 
-  const ProtvistaUniprot: React.ComponentType<ProtvistaUniprotProps>;
-  export default ProtvistaUniprot;
+  const ProtvistaUniprot: React.ComponentType<ProtvistaUniprotProps>
+  export default ProtvistaUniprot
 }

@@ -1,37 +1,43 @@
-import styled from 'styled-components'
-import backgroundImg from '../assets/background-img.png'
-import { useCallback, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { onAuthStateChanged } from 'firebase/auth'
-import { auth } from '../firebase'
+import { useCallback, useEffect } from "react"
+import { useNavigate } from "react-router-dom"
+import { onAuthStateChanged } from "firebase/auth"
+import styled from "styled-components"
+
+import backgroundImg from "../assets/background-img.png"
+import { auth } from "../firebase"
 
 const MainPage = () => {
   const navigate = useNavigate()
 
   const handleClick = useCallback(() => {
-    navigate('/auth')
+    navigate("/auth")
   }, [navigate])
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
-        navigate('/search')
+        navigate("/search")
       } else {
-        console.log('no user');
+        console.log("no user")
       }
-    });
+    })
 
     return () => {
-      unsubscribe();
-    };
-  }, [auth.currentUser]);
-
+      unsubscribe()
+    }
+  }, [auth.currentUser])
 
   return (
     <Wrapper>
-      <section><h1>Q-1 Search</h1>
-        <p>The world's leading high-quality, comprehensive and freely accessible resource of protein sequence and functional information.</p>
-        <button onClick={handleClick}>Login</button></section>
+      <section>
+        <h1>{"Q-1 Search"}</h1>
+        <p>
+          {
+            "The world's leading high-quality, comprehensive and freely accessible resource of protein sequence and functional information."
+          }
+        </p>
+        <button onClick={handleClick}>{"Login"}</button>
+      </section>
     </Wrapper>
   )
 }

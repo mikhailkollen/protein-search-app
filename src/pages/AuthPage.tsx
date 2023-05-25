@@ -1,138 +1,140 @@
-import { useEffect, useState } from 'react';
-import { onAuthStateChanged } from 'firebase/auth';
-import backgroundImg from '../assets/background-img.png';
-import { auth } from '../firebase';
-import { useAppDispatch, useAppSelector } from "../app/hooks";
-import { setCurrentUser, signIn, signUp } from "../features/search/searchSlice";
-import { useNavigate } from 'react-router-dom';
-import styled from 'styled-components';
+import { useEffect, useState } from "react"
+import { useNavigate } from "react-router-dom"
+import { onAuthStateChanged } from "firebase/auth"
+import styled from "styled-components"
+
+import { useAppDispatch, useAppSelector } from "../app/hooks"
+import backgroundImg from "../assets/background-img.png"
+import { setCurrentUser, signIn, signUp } from "../features/search/searchSlice"
+import { auth } from "../firebase"
 
 const AuthPage = () => {
-  const dispatch = useAppDispatch();
+  const dispatch = useAppDispatch()
 
-  const [isLogin, setIsLogin] = useState(true);
-  const [password, setPassword] = useState('');
-  const [passwordConfirm, setPasswordConfirm] = useState('');
-  const [email, setEmail] = useState('');
-  const [error, setError] = useState('');
-  const navigate = useNavigate();
-  const authError = useAppSelector((state) => state.search.error);
-  
+  const [isLogin, setIsLogin] = useState(true)
+  const [password, setPassword] = useState("")
+  const [passwordConfirm, setPasswordConfirm] = useState("")
+  const [email, setEmail] = useState("")
+  const [error, setError] = useState("")
+  const navigate = useNavigate()
+  const authError = useAppSelector((state) => state.search.error)
 
-  const [isFormValid, setIsFormValid] = useState(false);
+  const [isFormValid, setIsFormValid] = useState(false)
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
-        dispatch(setCurrentUser(user.email!));
-        navigate('/search')
+        dispatch(setCurrentUser(user.email!))
+        navigate("/search")
       } else {
-        console.log('no user');
+        console.log("no user")
       }
-    });
+    })
 
     return () => {
-      unsubscribe();
-    };
-  }, [auth.currentUser]);
+      unsubscribe()
+    }
+  }, [auth.currentUser])
 
   useEffect(() => {
     if (authError) {
-      setError(authError);
+      setError(authError)
     }
-  }, [authError]);
+  }, [authError])
 
   useEffect(() => {
-
-    checkFormValidity();
-  }, [isLogin, email, password, passwordConfirm]);
-
+    checkFormValidity()
+  }, [isLogin, email, password, passwordConfirm])
 
   const checkFormValidity = () => {
     if (isLogin) {
-
-      setIsFormValid(email !== '' && password !== '');
+      setIsFormValid(email !== "" && password !== "")
     } else {
-
-      setIsFormValid(email !== '' && password !== '' && password === passwordConfirm);
+      setIsFormValid(
+        email !== "" && password !== "" && password === passwordConfirm,
+      )
     }
-  };
+  }
 
   const handleSignIn = async (e: any) => {
-    e.preventDefault();
-    setError('');
+    e.preventDefault()
+    setError("")
 
     if (!validateEmail(email)) {
-      setError('Please enter a valid email address');
-      return;
+      setError("Please enter a valid email address")
+
+      return
     }
 
     if (!validatePassword(password)) {
-      setError('Please enter a valid password (min. 6 characters)');
-      return;
+      setError("Please enter a valid password (min. 6 characters)")
+
+      return
     }
-    
+
     try {
-      await dispatch(signIn({ email, password })).then(()=> {
-        navigate('/search');
-      });
-    } catch (err: any) {
-      setError(err.message);
-      console.log(err.message);
-      console.log('error during auth');
+      await dispatch(signIn({ email, password })).then(() => {
+        navigate("/search")
+      })
+    } catch (error_: any) {
+      setError(error_.message)
+      console.log(error_.message)
+      console.log("error during auth")
     }
-  };
+  }
 
   const handleSignUp = async (e: any) => {
-    e.preventDefault();
-    setError('');
+    e.preventDefault()
+    setError("")
+
     if (!validateEmail(email)) {
-      setError('Please enter a valid email address');
-      return;
+      setError("Please enter a valid email address")
+
+      return
     }
 
     if (!validatePassword(password)) {
-      setError('Please enter a valid password (min. 6 characters)');
-      return;
-    }
-    if (password !== passwordConfirm) {
-      setError('Passwords do not match');
-      return;
-    }
-    try {
-      await dispatch(signUp({ email, password }));
-      console.log(auth.currentUser);
-    } catch (err: any) {
-      setError(err.message);
-      console.log(err.message);
-    }
-  };
+      setError("Please enter a valid password (min. 6 characters)")
 
+      return
+    }
+
+    if (password !== passwordConfirm) {
+      setError("Passwords do not match")
+
+      return
+    }
+
+    try {
+      await dispatch(signUp({ email, password }))
+      console.log(auth.currentUser)
+    } catch (error_: any) {
+      setError(error_.message)
+      console.log(error_.message)
+    }
+  }
 
   const handleEmailChange = (e: any) => {
-    setEmail(e.target.value);
-  };
-
+    setEmail(e.target.value)
+  }
 
   const handlePasswordChange = (e: any) => {
-    setPassword(e.target.value);
-  };
+    setPassword(e.target.value)
+  }
 
   const handlePasswordConfirmChange = (e: any) => {
-    setPasswordConfirm(e.target.value);
-  };
-
+    setPasswordConfirm(e.target.value)
+  }
 
   const validateEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-  };
-
+    return emailRegex.test(email)
+  }
 
   const validatePassword = (password: string) => {
-    return password.length >= 6;
-  };
+    return password.length >= 6
+  }
 
   return (
     <Wrapper>
@@ -140,50 +142,50 @@ const AuthPage = () => {
         <h1>{isLogin ? "Login" : "Sign up"}</h1>
         <form onSubmit={isLogin ? handleSignIn : handleSignUp}>
           <label>
-            <p>Email</p>
+            <p>{"Email"}</p>
             <input
               type="email"
               required
               onChange={handleEmailChange}
-              placeholder='Enter your email'
-              style={{ outline: error ? '1px solid var(--alert-red)' : '' }}
+              placeholder="Enter your email"
+              style={{ outline: error ? "1px solid var(--alert-red)" : "" }}
             />
           </label>
           <label>
-            <p>Password</p>
+            <p>{"Password"}</p>
             <input
               type="password"
               required
               onChange={handlePasswordChange}
-              placeholder='Enter your password'
-              style={{ outline: error ? '1px solid var(--alert-red)' : '' }}
+              placeholder="Enter your password"
+              style={{ outline: error ? "1px solid var(--alert-red)" : "" }}
             />
           </label>
           {!isLogin && (
             <label>
-              <p>Repeat Password</p>
+              <p>{"Repeat Password"}</p>
               <input
                 type="password"
                 required
                 onChange={handlePasswordConfirmChange}
-                placeholder='Enter your password again'
-                style={{ outline: error ? '1px solid var(--alert-red)' : '' }}
+                placeholder="Enter your password again"
+                style={{ outline: error ? "1px solid var(--alert-red)" : "" }}
               />
             </label>
           )}
 
-          <div className='btn-container'>
+          <div className="btn-container">
             <button type="submit" disabled={!isFormValid}>
               {isLogin ? "Login" : "Create Account"}
             </button>
-            <p className='error-message'>{error ? error : ''}</p>
+            <p className="error-message">{error ? error : ""}</p>
             <span>
               {isLogin ? "Don't have an account?" : "Already have an account?"}
               <button
                 type="button"
                 onClick={() => {
-                  setIsLogin(!isLogin);
-                  setError('');
+                  setIsLogin(!isLogin)
+                  setError("")
                 }}
               >
                 {isLogin ? "Sign up" : "Login"}
@@ -193,8 +195,9 @@ const AuthPage = () => {
         </form>
       </div>
     </Wrapper>
-  );
-};
+  )
+}
+
 const Wrapper = styled.main`
   display: flex;
   flex-direction: column;
@@ -266,7 +269,7 @@ const Wrapper = styled.main`
     margin-top: 12px;
   }
 
-  button[type='submit'] {
+  button[type="submit"] {
     background-color: var(--light-blue);
     border: none;
     border-radius: 8px;
@@ -278,7 +281,7 @@ const Wrapper = styled.main`
     cursor: pointer;
   }
 
-  button[type='button'] {
+  button[type="button"] {
     font-weight: 700;
     font-size: 12px;
   }
@@ -289,6 +292,6 @@ const Wrapper = styled.main`
     font-size: 12px;
     font-weight: 600;
   }
-`;
+`
 
-export default AuthPage;
+export default AuthPage

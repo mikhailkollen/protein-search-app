@@ -1,39 +1,40 @@
-import { useEffect, useState } from "react";
-import styled from "styled-components";
-import { Link } from "react-router-dom";
-import Header from "../components/Header";
-import { auth } from "../firebase";
-const ErrorPage = () => {
+import { useEffect, useState } from "react"
+import { Link } from "react-router-dom"
+import styled from "styled-components"
 
-  const [currentUser, setCurrentUser] = useState(auth.currentUser);
-  
+import Header from "../components/Header"
+import { auth } from "../firebase"
+
+const ErrorPage = () => {
+  const [currentUser, setCurrentUser] = useState(auth.currentUser)
+
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
       if (user) {
-        setCurrentUser(user);
+        setCurrentUser(user)
       } else {
-        console.log("no user");
+        console.log("no user")
       }
-    });
+    })
 
     return () => {
-      unsubscribe();
-    };
-  }, [auth.currentUser]);
-  
+      unsubscribe()
+    }
+  }, [auth.currentUser])
+
   return (
     <Wrapper>
       {currentUser && <Header />}
       <section>
-        <h1>404</h1>
-        <h3>Page not found</h3>
+        <h1>{"404"}</h1>
+        <h3>{"Page not found"}</h3>
         <Link to="/search" className="btn">
-          Back to Search
+          {"Back to Search"}
         </Link>
       </section>
     </Wrapper>
-  );
-};
+  )
+}
 
 const Wrapper = styled.main`
   display: flex;
@@ -66,8 +67,8 @@ const Wrapper = styled.main`
     padding: 16px 35px;
     font-weight: 700;
     font-size: 12px;
-    border-radius: 24px;/* Add this line */
+    border-radius: 24px; /* Add this line */
   }
-`;
+`
 
-export default ErrorPage;
+export default ErrorPage
