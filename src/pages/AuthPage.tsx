@@ -67,7 +67,7 @@ const AuthPage = () => {
     }
 
     if (!validatePassword(password)) {
-      setError("Please enter a valid password (min. 6 characters)")
+      setError("Please enter a valid password")
 
       return
     }
@@ -94,7 +94,7 @@ const AuthPage = () => {
     }
 
     if (!validatePassword(password)) {
-      setError("Please enter a valid password (min. 6 characters)")
+      setError("Please enter a valid password (min. 6 characters and includes at least one lowercase letter, one uppercase letter, and one number)")
 
       return
     }
@@ -133,7 +133,12 @@ const AuthPage = () => {
   }
 
   const validatePassword = (password: string) => {
-    return password.length >= 6
+    const hasLowerCase = /[a-z]/.test(password);
+  const hasUpperCase = /[A-Z]/.test(password);
+  const hasNumber = /\d/.test(password);
+  const hasMinLength = password.length >= 6;
+
+  return hasLowerCase && hasUpperCase && hasNumber && hasMinLength;
   }
 
   return (
@@ -279,6 +284,12 @@ const Wrapper = styled.main`
     font-weight: 700;
     font-size: 12px;
     cursor: pointer;
+  }
+
+  button[type="submit"]:disabled {
+    background-color: var(--dark-grey-2);
+    color: var(--white);
+    cursor: not-allowed;
   }
 
   button[type="button"] {

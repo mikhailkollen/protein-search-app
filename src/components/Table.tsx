@@ -312,9 +312,10 @@ const Table = () => {
         >
           <h3>
             {totalResults}
-            {' Search Results for "'}
-            {searchQuery}
-            {'"'}
+            {' Search Results '}
+            {(searchQuery && searchQuery !== "*") && (
+              `for "${searchQuery}" `)
+            }
           </h3>
           <table>
             <thead>
