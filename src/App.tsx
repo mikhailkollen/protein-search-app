@@ -1,49 +1,57 @@
 import "./App.css"
-import MainPage from "./pages/MainPage"
+
+import { useCallback, useEffect, useState } from "react"
+import { Provider } from "react-redux"
+import {
+  BrowserRouter as Router,
+  Navigate,
+  Route,
+  Routes,
+  useLocation,
+  useNavigate,
+} from "react-router-dom"
+
+import { store } from "./app/store"
+import { auth } from "./firebase"
 import AuthPage from "./pages/AuthPage"
 import ErrorPage from "./pages/ErrorPage"
+import MainPage from "./pages/MainPage"
 import SearchPage from "./pages/SearchPage"
-import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate, useLocation } from "react-router-dom"
-import SingleProteinPage from "./pages/SingleProteinPage";
-import { Provider } from "react-redux"
-import {store} from "./app/store"
-import { auth } from "./firebase";
-import { useCallback, useEffect, useState } from "react"
+import SingleProteinPage from "./pages/SingleProteinPage"
 
 const ProtectedRoute = ({ element: Component, ...rest }: any) => {
-  const [loading, setLoading] = useState(true);
-  const [authenticated, setAuthenticated] = useState(false);
-  const navigate = useNavigate();
-  const location = useLocation();
+  const [loading, setLoading] = useState(true)
+  const [authenticated, setAuthenticated] = useState(false)
+  const navigate = useNavigate()
+  const location = useLocation()
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
       if (user) {
-        setAuthenticated(true);
+        setAuthenticated(true)
       } else {
-        setAuthenticated(false);
-        navigate('/auth', { state: { from: location.pathname } });
+        setAuthenticated(false)
+        navigate("/auth", { state: { from: location.pathname } })
       }
-      setLoading(false);
-    });
+
+      setLoading(false)
+    })
 
     return () => {
-      unsubscribe();
-    };
-  }, [navigate, location]);
+      unsubscribe()
+    }
+  }, [navigate, location])
 
   if (loading) {
-    return null;
+    return null
   }
 
   if (!authenticated) {
-    return <Navigate to="/auth" />;
+    return <Navigate to="/auth" />
   }
 
-  return <Component {...rest} />;
-};
-
-  
+  return <Component {...rest} />
+}
 
 const App = () => {
   return (
@@ -55,27 +63,21 @@ const App = () => {
           <Route path="/error" element={<ErrorPage />} />
           <Route
             path="/search"
-            element={
-              <ProtectedRoute element={SearchPage} />
-            }
+            element={<ProtectedRoute element={SearchPage} />}
           />
           <Route
             path="/search/:searchValue"
-            element={
-              <ProtectedRoute element={SearchPage} />
-            }
+            element={<ProtectedRoute element={SearchPage} />}
           />
           <Route
             path="/protein/:id"
-            element={
-              <ProtectedRoute element={SingleProteinPage} />
-            }
+            element={<ProtectedRoute element={SingleProteinPage} />}
           />
           <Route path="*" element={<Navigate to="/error" />} />
         </Routes>
       </Router>
     </Provider>
-  );
-};
+  )
+}
 
 export default App

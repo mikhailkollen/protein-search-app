@@ -1,113 +1,143 @@
-import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth"; 
-import { auth } from "../../firebase";
+import { createAsyncThunk, createSlice } from "@reduxjs/toolkit"
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+} from "firebase/auth"
+
+import { auth } from "../../firebase"
 
 export interface SearchState {
-  currentUser: any;
-  error: any;
+  currentUser: any
+  searchQuery: string
+  results: any
+  error: any
 }
 
 const initialState = {
   currentUser: null,
+  searchQuery: "",
+  results: [],
   error: "",
-};
+}
 
 export const signIn = createAsyncThunk(
   "search/signIn",
   async ({ email, password }: any) => {
     try {
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      const { user } = userCredential;
-      return {uid: user.uid, email: user.email};
-    } catch (err) {
-      throw err;
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        email,
+        password,
+      )
+
+      const { user } = userCredential
+
+      return { uid: user.uid, email: user.email }
+    } catch (error) {
+      throw error
     }
-  }
-);
+  },
+)
 
 export const signOut = createAsyncThunk("search/signOut", async () => {
   try {
-    await auth.signOut();
-    await console.log(auth.currentUser);
-  } catch (err) {
-    throw err;
+    await auth.signOut()
+    await console.log(auth.currentUser)
+  } catch (error) {
+    throw error
   }
-});
+})
 
 export const signUp = createAsyncThunk(
   "search/signUp",
   async ({ email, password }: any) => {
     try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      const { user } = userCredential;
-      return {uid: user.uid, email: user.email};
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password,
+      )
 
-    } catch (err) {
-      throw err;
+      const { user } = userCredential
+
+      return { uid: user.uid, email: user.email }
+    } catch (error) {
+      throw error
     }
-  }
-);
+  },
+)
 
 export const searchSlice = createSlice({
   name: "search",
   initialState,
   reducers: {
     setCurrentUser: (state, action) => {
-      state.currentUser = action.payload;
+      state.currentUser = action.payload
     },
     setError: (state, action) => {
-      state.error = action.payload;
+      state.error = action.payload
     },
     clearError: (state) => {
-      state.error = "";
+      state.error = ""
+    },
+    setSearchQuery: (state, action) => {
+      state.searchQuery = action.payload
+    },
+    setResults: (state, action) => {
+      state.results = action.payload
     },
   },
   extraReducers: (builder) => {
     builder
       .addCase(signIn.pending, (state) => {
-        state.error = "";
+        state.error = ""
       })
       .addCase(signIn.fulfilled, (state: SearchState, action) => {
-        state.currentUser = action.payload;
-        console.log(action.payload);
+        state.currentUser = action.payload
+        console.log(action.payload)
       })
       .addCase(signIn.rejected, (state: SearchState, action) => {
         if (action.error.code === "auth/wrong-password") {
-          state.error = "Wrong password";
+          state.error = "Wrong password"
         } else if (action.error.code === "auth/user-not-found") {
-          state.error = "User not found";
+          state.error = "User not found"
         } else {
-          state.error = action.error.code;
+          state.error = action.error.code
         }
       })
       .addCase(signUp.pending, (state) => {
-        state.error = "";
+        state.error = ""
       })
       .addCase(signUp.fulfilled, (state: SearchState, action) => {
-        state.currentUser = action.payload;
+        state.currentUser = action.payload
       })
       .addCase(signUp.rejected, (state: SearchState, action) => {
-        if (action.error.code === "auth/email-already-in-use") {
-          state.error = "Email already in use";
-        } else {
-                  state.error = action.error.code;
-        }
-
+        state.error =
+          action.error.code === "auth/email-already-in-use"
+            ? "Email already in use"
+            : action.error.code
       })
       .addCase(signOut.pending, (state) => {
-        state.error = "";
+        state.error = ""
       })
       .addCase(signOut.fulfilled, (state: SearchState) => {
-        state.currentUser = null;
-      }).addCase(signOut.rejected, (state: SearchState, action) => {
-        state.error = action.error.message;
-        console.log(action.error.message);
+        state.currentUser = null
+      })
+      .addCase(signOut.rejected, (state: SearchState, action) => {
+        state.error = action.error.message
+        console.log(action.error.message)
       })
   },
-});
+})
 
-export const { setCurrentUser, setError, clearError } = searchSlice.actions;
+export const {
+  setCurrentUser,
+  setError,
+  clearError,
+  setSearchQuery,
+  setResults,
+} = searchSlice.actions
 
-export const selectCurrentUser = (state: any) => state.search.currentUser;
+export const selectCurrentUser = (state: any) => state.search.currentUser
 
-export default searchSlice.reducer;
+export default searchSlice.reducer
