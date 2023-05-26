@@ -1,14 +1,12 @@
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useRef } from "react"
 import { useNavigate } from "react-router-dom"
-import { Tab } from "@mui/material"
 import { onAuthStateChanged } from "firebase/auth"
 import styled from "styled-components"
 
-import { useAppDispatch, useAppSelector } from "../app/hooks"
+import { useAppDispatch } from "../app/hooks"
 import FiltersIcon from "../assets/FiltersIcon"
 import Header from "../components/Header"
 import TableWithReactQuery from "../components/Table"
-import TableViewWithReactQueryProvider from "../components/TableView"
 import { setCurrentUser, setSearchQuery } from "../features/search/searchSlice"
 import { auth } from "../firebase"
 

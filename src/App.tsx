@@ -1,6 +1,6 @@
 import "./App.css"
 
-import { useCallback, useEffect, useState } from "react"
+import { useEffect, useState } from "react"
 import { Provider } from "react-redux"
 import {
   BrowserRouter as Router,

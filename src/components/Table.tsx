@@ -1,5 +1,4 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react"
-import ReactDOM from "react-dom/client"
 import { useNavigate } from "react-router-dom"
 import { Link } from "react-router-dom"
 import {
@@ -18,8 +17,7 @@ import {
 } from "@tanstack/react-table"
 import styled from "styled-components"
 
-import { useAppDispatch, useAppSelector } from "../app/hooks"
-import { setResults } from "../features/search/searchSlice"
+import { useAppSelector } from "../app/hooks"
 
 const fetchSize = 25
 
@@ -27,9 +25,9 @@ const queryClient = new QueryClient()
 
 const Table = () => {
   const searchQuery = useAppSelector((state) => state.search.searchQuery)
-  const rerender = React.useReducer(() => ({}), {})[1]
+  // const rerender = React.useReducer(() => ({}), {})[1]
   const navigate = useNavigate()
-  const dispatch = useAppDispatch()
+  // const dispatch = useAppDispatch()
 
   const tableContainerRef = React.useRef<HTMLDivElement>(null)
 
@@ -48,7 +46,7 @@ const Table = () => {
 
   useEffect(() => {
     const queryParams = new URLSearchParams(window.location.search)
-    const queryValue = queryParams.get("query") ?? query
+    // const queryValue = queryParams.get("query") ?? query
 
     setCursor("")
 
@@ -158,7 +156,7 @@ const Table = () => {
     }
   }, [globalFilter, cursor, updateQueryParam, searchQuery])
 
-  const { data, fetchNextPage, isError, isFetching, isLoading } =
+  const { data, fetchNextPage, isFetching, isLoading } =
     useInfiniteQuery({
       queryKey: ["table-data", globalFilter, sorting],
       queryFn: fetchData,
