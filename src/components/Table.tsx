@@ -16,6 +16,9 @@ import {
   useReactTable,
 } from "@tanstack/react-table"
 import styled from "styled-components"
+import SortIconAsc from "../assets/SortIconAsc"
+import SortIconDesc from "../assets/SortIconDesc"
+import SortIconInactive from "../assets/SortIconInactive"
 
 import { useAppSelector } from "../app/hooks"
 
@@ -23,12 +26,87 @@ const fetchSize = 25
 
 const queryClient = new QueryClient()
 
+const columns = [
+  {
+    accessorKey: "number",
+    header: "#",
+    size: 60,
+    cell: (info: any) => info.row.index + 1,
+  },
+  {
+    accessorKey: "accession",
+    header: "Entry",
+    cell: (info: any) => {
+      const value = info.getValue() as string
+
+      return (
+        <Link
+          to={`/protein/${value}`}
+          className="entry-link"
+          target="_blank"
+        >
+          {value}
+        </Link>
+      )
+    },
+  },
+  {
+    accessorKey: "id",
+    header: "Entry Name",
+    cell: (info: any) => info.getValue(),
+  },
+  {
+    accessorKey: "gene",
+    header: "Genes",
+    cell: (info: any) => info.getValue(),
+  },
+  {
+    accessorKey: "organism_name",
+    header: "Organism",
+    cell: (info: any) => {
+      return (
+        <span className="organism-name">
+          {info.getValue() as React.ReactNode}
+        </span>
+      )
+    },
+  },
+  {
+    accessorKey: "subcellularLocation",
+    header: "Subcellular Location",
+    cell: (info: any) => {
+      const value = info.getValue() as string
+
+      if (value.length > 30) {
+        const words = value.split(" ")
+        const truncatedValue = words.slice(0, 2).join(" ")
+
+        return (
+          <span className="subcellular-location">
+            {truncatedValue}
+            {"..."}
+          </span>
+        )
+      }
+
+      return value
+    },
+  },
+  {
+    accessorKey: "length",
+    header: "Length",
+    cell: (info: any) => {
+      return info.getValue()
+    },
+  },
+];
+
 const Table = () => {
   const searchQuery = useAppSelector((state) => state.search.searchQuery)
   // const rerender = React.useReducer(() => ({}), {})[1]
   const navigate = useNavigate()
   // const dispatch = useAppDispatch()
-
+  const rerender = React.useReducer(() => ({}), {})[1]
   const tableContainerRef = React.useRef<HTMLDivElement>(null)
 
   const [sorting, setSorting] = useState<SortingState>([])
@@ -37,18 +115,34 @@ const Table = () => {
   const [query, setQuery] = useState<string>(searchQuery || "*")
   const [hasElements, setHasElements] = useState(false)
   const [totalResults, setTotalResults] = useState("0")
-  
+  const [sort, setSort] = useState({ id: '', type: '' })
+
+
+  const handleSort = (id: string) => {
+    setCursor("")
+    if (sort.id !== id) {
+      setSort({ id, type: 'asc' })
+    } else if (sort.id === id && sort.type === 'desc') {
+      rerender();
+      setSort({ id: '', type: '' })
+
+    } else if (sort.id === id && sort.type === 'asc') {
+      setSort({ id, type: 'desc' })
+    }
+    return;
+  };
+
+
 
   useEffect(() => {
     setQuery(searchQuery || "*")
     setCursor("")
+    setSort({ id: '', type: '' })
   }, [searchQuery])
 
   useEffect(() => {
     const queryParams = new URLSearchParams(window.location.search)
     // const queryValue = queryParams.get("query") ?? query
-
-    setCursor("")
 
     if (query === "*") {
       queryParams.delete("query")
@@ -68,10 +162,8 @@ const Table = () => {
     [navigate],
   )
 
-  const fetchData = useCallback(async () => {
+  const fetchData = useCallback(async ({ pageParam = "" }) => {
     const query = globalFilter || "*"
-
-    setCursor("")
     const queryParams = new URLSearchParams(window.location.search)
 
     if (query === "*") {
@@ -80,11 +172,12 @@ const Table = () => {
       queryParams.set("query", query)
     }
 
-    const url = `https://rest.uniprot.org/uniprotkb/search?query=${
-      searchQuery || "*"
-    }&format=json&fields=accession,id,gene_names,organism_name,length,cc_subcellular_location&cursor=${
-      cursor && cursor
-    }&size=${fetchSize}`
+    if (sort.id) {
+
+    }
+    const url = `https://rest.uniprot.org/uniprotkb/search?query=${searchQuery || "*"
+      }&format=json&fields=accession,id,gene_names,organism_name,length,cc_subcellular_location${pageParam ? `&cursor=${pageParam}` : ''}&size=${fetchSize}${sort.id ? `&sort=${sort.id}%20${sort.type}` : ''}`;
+    console.log(url);
 
     const response = await fetch(url)
     const link = response.headers.get("Link")
@@ -97,9 +190,12 @@ const Table = () => {
       setTotalResults(total)
     }
 
-    const nextCursor = link?.match(/cursor=(.*?)size/)?.[1] ?? ""
+    const nextCursor = link?.match(/cursor=(.*?)size/)?.[1] ?? "";
 
-    setCursor(nextCursor)
+    const trimmedCursor = nextCursor.endsWith('&') ? nextCursor.slice(0, -1) : nextCursor;
+    console.log(trimmedCursor);
+
+    setCursor(trimmedCursor);
 
     const json = await response.json()
 
@@ -128,17 +224,17 @@ const Table = () => {
 
           return sublocations
             ? sublocations.map((location: any) => {
-                return location?.location ? location.location.value : "N/A"
-              })
+              return location?.location ? location.location.value : "N/A"
+            })
             : []
         })
         .join(", ")
 
       return {
-        entry: result.primaryAccession,
-        entryName: result.uniProtkbId,
-        genes: genes || "N/A",
-        organism: result.organism.scientificName,
+        accession: result.primaryAccession,
+        id: result.uniProtkbId,
+        gene: genes || "N/A",
+        organism_name: result.organism.scientificName,
         subcellularLocation: subcellularLocations || "N/A",
         length: result.sequence.length,
       }
@@ -152,20 +248,21 @@ const Table = () => {
 
     return {
       results,
-      totalResults: json.totalResults,
+      totalResults: total,
+      nextCursor: trimmedCursor,
     }
-  }, [globalFilter, cursor, updateQueryParam, searchQuery])
+  }, [globalFilter, cursor, updateQueryParam, searchQuery, sort.id, sort.type])
 
   const { data, fetchNextPage, isFetching, isLoading } =
     useInfiniteQuery({
-      queryKey: ["table-data", globalFilter, sorting],
+      queryKey: ["table-data", globalFilter, sorting, sort],
       queryFn: fetchData,
       getNextPageParam: (lastPage, pages) => {
-        if (lastPage.results.length < fetchSize) {
-          return
-        }
 
-        return pages.length
+        if (lastPage.results.length < fetchSize) {
+          return;
+        }
+        return lastPage.nextCursor;
       },
       keepPreviousData: true,
       refetchOnWindowFocus: false,
@@ -199,85 +296,9 @@ const Table = () => {
 
   useEffect(() => {
     fetchMoreOnBottomReached(tableContainerRef.current)
-  }, [fetchMoreOnBottomReached, searchQuery])
+  }, [fetchMoreOnBottomReached, searchQuery, sort.id, sort.type])
 
-  const columns = useMemo<ColumnDef<any>[]>(
-    () => [
-      {
-        accessorKey: "number",
-        header: "#",
-        size: 60,
-        cell: (info) => info.row.index + 1,
-      },
-      {
-        accessorKey: "entry",
-        header: "Entry",
-        cell: (info) => {
-          const value = info.getValue() as string
 
-          return (
-            <Link
-              to={`/protein/${value}`}
-              className="entry-link"
-              target="_blank"
-            >
-              {value}
-            </Link>
-          )
-        },
-      },
-      {
-        accessorKey: "entryName",
-        header: "Entry Name",
-        cell: (info) => info.getValue(),
-      },
-      {
-        accessorKey: "genes",
-        header: "Genes",
-        cell: (info) => info.getValue(),
-      },
-      {
-        accessorKey: "organism",
-        header: "Organism",
-        cell: (info) => {
-          return (
-            <span className="organism-name">
-              {info.getValue() as React.ReactNode}
-            </span>
-          )
-        },
-      },
-      {
-        accessorKey: "subcellularLocation",
-        header: "Subcellular Location",
-        cell: (info) => {
-          const value = info.getValue() as string
-
-          if (value.length > 30) {
-            const words = value.split(" ")
-            const truncatedValue = words.slice(0, 2).join(" ")
-
-            return (
-              <span className="subcellular-location">
-                {truncatedValue}
-                {"..."}
-              </span>
-            )
-          }
-
-          return value
-        },
-      },
-      {
-        accessorKey: "length",
-        header: "Length",
-        cell: (info) => {
-          return info.getValue()
-        },
-      },
-    ],
-    [],
-  )
 
   const table = useReactTable({
     data: flatData,
@@ -329,20 +350,16 @@ const Table = () => {
                         {header.isPlaceholder ? null : (
                           <div
                             {...{
-                              className: header.column.getCanSort()
-                                ? "cursor-pointer select-none"
-                                : "",
-                              onClick: header.column.getToggleSortingHandler(),
+                              onClick: (header.column.id !== "subcellularLocation" && header.column.id !== "number") ? () => handleSort(header.column.id) : undefined,
+                              className: (header.column.id !== "subcellularLocation" && header.column.id !== "number") ? "cursor-pointer sorted-container" : undefined,
                             }}
+
                           >
                             {flexRender(
                               header.column.columnDef.header,
                               header.getContext(),
                             )}
-                            {{
-                              asc: " 🔼",
-                              desc: " 🔽",
-                            }[header.column.getIsSorted() as string] ?? null}
+                            {(header.column.id !== "subcellularLocation" && header.column.id !== "number") && ((sort.id === header.column.id) ? sort.type === "desc" ? <SortIconDesc /> : <SortIconAsc /> : <SortIconInactive />)}
                           </div>
                         )}
                       </th>
@@ -401,6 +418,7 @@ const Wrapper = styled.div`
   table {
     border-collapse: collapse;
     min-width: 100%;
+    text-align: left;
   }
   th {
     position: sticky;
@@ -425,6 +443,10 @@ const Wrapper = styled.div`
     border-radius: 0 8px 8px 0;
   }
 
+  th{
+   width: fit-content;
+  }
+
   .entry-link {
     color: var(--blue);
     font-weight: 600;
@@ -443,13 +465,16 @@ const Wrapper = styled.div`
     margin-bottom: 20px;
     font-weight: 600;
   }
+  .cursor-pointer {
+    cursor: pointer;
+  }
 
-  /* .no-data-text {
-    position: absolute;
-    width: 300px;
-    top: 50%;
-    left: calc(50% - 150px);
-   } */
+  .sorted-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
 `
 
 export default TableWithReactQuery
