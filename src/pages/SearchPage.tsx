@@ -97,13 +97,14 @@ const Wrapper = styled.section`
       align-items: center;
       gap: 9px;
       input {
-        width: 70%;
+        width: 80%;
         border: 1px solid var(--light-grey);
         border-radius: 8px;
         padding: 11px 16px;
         font-size: 14px;
         line-height: 19px;
         color: var(--dark);
+        height: 40px;
       }
 
       input::placeholder {
@@ -115,19 +116,22 @@ const Wrapper = styled.section`
         background-color: var(--light-blue);
         border: none;
         padding: 11px 66px;
-
+        height: 40px;
         color: var(--active-blue);
         font-weight: 600;
-        line-height: 19px;
+        line-height: 18px;
         text-align: center;
         vertical-align: middle;
         font-size: 14px;
         cursor: pointer;
         transition: all 0.3s ease-in-out;
+        height: 100%;
       }
 
       button[type="button"] {
-        height: 40px;
+        height: 100%;
+        line-height: 0.5;
+        padding: 11px 9px;
       }
       button:hover {
         background-color: var(--light-blue);

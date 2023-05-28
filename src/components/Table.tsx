@@ -7,7 +7,6 @@ import {
   useInfiniteQuery,
 } from "@tanstack/react-query"
 import {
-  ColumnDef,
   flexRender,
   getCoreRowModel,
   getSortedRowModel,
@@ -103,11 +102,12 @@ const columns = [
 
 const Table = () => {
   const searchQuery = useAppSelector((state) => state.search.searchQuery)
-  // const rerender = React.useReducer(() => ({}), {})[1]
+  
   const navigate = useNavigate()
-  // const dispatch = useAppDispatch()
-  const rerender = React.useReducer(() => ({}), {})[1]
   const tableContainerRef = React.useRef<HTMLDivElement>(null)
+
+  
+
 
   const [sorting, setSorting] = useState<SortingState>([])
   const [cursor, setCursor] = useState<string | undefined>("")
@@ -115,7 +115,36 @@ const Table = () => {
   const [query, setQuery] = useState<string>(searchQuery || "*")
   const [hasElements, setHasElements] = useState(false)
   const [totalResults, setTotalResults] = useState("0")
-  const [sort, setSort] = useState({ id: '', type: '' })
+  const [sort, setSort] = useState( { id: '', type: '' })
+
+    
+    
+
+
+    useEffect(() => {
+  const queryParams = new URLSearchParams(window.location.search);
+  const sortValue = queryParams.get("sort") ?? "";
+
+  if (sortValue && sort.id === "") {
+    const decoded = decodeURIComponent(sortValue);
+    const [id, type] = decoded.split(" ");
+    setSort({ id: id, type: type });
+    console.log("id", id);
+    console.log("type", type);
+  }
+}, []);
+
+useEffect(() => {
+  const queryParams = new URLSearchParams(window.location.search);
+  const sortValue = queryParams.get("sort") ?? sort.id;
+  console.log(sort);
+
+  if (sortValue && sort.id !== "") {
+    queryParams.set("sort", `${sort.id} ${sort.type}`);
+  }
+  updateQueryParam(queryParams);
+}, [sort]);
+
 
 
   const handleSort = (id: string) => {
@@ -123,7 +152,6 @@ const Table = () => {
     if (sort.id !== id) {
       setSort({ id, type: 'asc' })
     } else if (sort.id === id && sort.type === 'desc') {
-      rerender();
       setSort({ id: '', type: '' })
 
     } else if (sort.id === id && sort.type === 'asc') {
@@ -137,12 +165,10 @@ const Table = () => {
   useEffect(() => {
     setQuery(searchQuery || "*")
     setCursor("")
-    setSort({ id: '', type: '' })
   }, [searchQuery])
 
   useEffect(() => {
     const queryParams = new URLSearchParams(window.location.search)
-    // const queryValue = queryParams.get("query") ?? query
 
     if (query === "*") {
       queryParams.delete("query")
@@ -156,7 +182,8 @@ const Table = () => {
   const updateQueryParam = useCallback(
     (params: URLSearchParams) => {
       const search = params.toString()
-
+      console.log(search);
+      
       navigate({ search })
     },
     [navigate],
@@ -193,8 +220,6 @@ const Table = () => {
     const nextCursor = link?.match(/cursor=(.*?)size/)?.[1] ?? "";
 
     const trimmedCursor = nextCursor.endsWith('&') ? nextCursor.slice(0, -1) : nextCursor;
-    console.log(trimmedCursor);
-
     setCursor(trimmedCursor);
 
     const json = await response.json()
@@ -454,7 +479,8 @@ const Wrapper = styled.div`
 
   .container {
     height: 100%;
-    overflow-y: hidden;
+    width: 100%;
+    overflow: scroll;
   }
 
   .container::-webkit-scrollbar {
