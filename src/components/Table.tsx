@@ -282,7 +282,7 @@ useEffect(() => {
     useInfiniteQuery({
       queryKey: ["table-data", globalFilter, sorting, sort],
       queryFn: fetchData,
-      getNextPageParam: (lastPage, pages) => {
+      getNextPageParam: (lastPage) => {
 
         if (lastPage.results.length < fetchSize) {
           return;
