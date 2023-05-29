@@ -102,6 +102,7 @@ const columns = [
 
 const Table = () => {
   const searchQuery = useAppSelector((state) => state.search.searchQuery)
+  const selectedFilters = useAppSelector((state) => state.search.selectedFilters)
   
   const navigate = useNavigate()
   const tableContainerRef = React.useRef<HTMLDivElement>(null)
@@ -116,8 +117,6 @@ const Table = () => {
   const [hasElements, setHasElements] = useState(false)
   const [totalResults, setTotalResults] = useState("0")
   const [sort, setSort] = useState( { id: '', type: '' })
-
-    
     
 
 
@@ -165,7 +164,9 @@ useEffect(() => {
   useEffect(() => {
     setQuery(searchQuery || "*")
     setCursor("")
-  }, [searchQuery])
+    console.log(selectedFilters);
+    
+  }, [searchQuery, selectedFilters])
 
   useEffect(() => {
     const queryParams = new URLSearchParams(window.location.search)
@@ -198,12 +199,20 @@ useEffect(() => {
     } else {
       queryParams.set("query", query)
     }
-
-    if (sort.id) {
-
+       
+       const filters = (selectedFilters as any)?.map((filter:any) => {
+      return `%20AND%20(${filter.name}:${filter.value})`
     }
-    const url = `https://rest.uniprot.org/uniprotkb/search?query=${searchQuery || "*"
-      }&format=json&fields=accession,id,gene_names,organism_name,length,cc_subcellular_location${pageParam ? `&cursor=${pageParam}` : ''}&size=${fetchSize}${sort.id ? `&sort=${sort.id}%20${sort.type}` : ''}`;
+    ).join('')
+    
+    
+    
+    
+   
+
+    const url = `https://rest.uniprot.org/uniprotkb/search?format=json&fields=accession,id,gene_names,organism_name,length,cc_subcellular_location&query=(${searchQuery || "*"
+      })${selectedFilters ? filters : ""}${pageParam ? `&cursor=${pageParam}` : ''}&size=${fetchSize}${sort.id ? `&sort=${sort.id}%20${sort.type}` : ''}`;
+
     console.log(url);
 
     const response = await fetch(url)
@@ -276,11 +285,11 @@ useEffect(() => {
       totalResults: total,
       nextCursor: trimmedCursor,
     }
-  }, [globalFilter, cursor, updateQueryParam, searchQuery, sort.id, sort.type])
+  }, [globalFilter, cursor, updateQueryParam, searchQuery, sort.id, sort.type, selectedFilters])
 
   const { data, fetchNextPage, isFetching, isLoading } =
     useInfiniteQuery({
-      queryKey: ["table-data", globalFilter, sorting, sort],
+      queryKey: ["table-data", globalFilter, sorting, sort, selectedFilters],
       queryFn: fetchData,
       getNextPageParam: (lastPage) => {
 
@@ -321,7 +330,7 @@ useEffect(() => {
 
   useEffect(() => {
     fetchMoreOnBottomReached(tableContainerRef.current)
-  }, [fetchMoreOnBottomReached, searchQuery, sort.id, sort.type])
+  }, [fetchMoreOnBottomReached, searchQuery, sort.id, sort.type, selectedFilters])
 
 
 

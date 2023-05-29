@@ -68,7 +68,7 @@ const SingleProteinPage = () => {
 
   useEffect(() => {
     fetchSingleProtein()
-  }, [id, fetchSingleProtein])
+  }, [id])
 
   return (
     <>
@@ -128,10 +128,11 @@ const Wrapper = styled.section`
     }
     h1 {
       font-size: 22px;
+      font-weight: 600;
     }
     h2 {
       color: var(--dark-grey-3);
-      margin-bottom: 4px;
+      margin-bottom: 12px;
     }
 
     p {

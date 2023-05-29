@@ -11,6 +11,8 @@ export interface SearchState {
   searchQuery: string
   results: any
   error: any
+  selectedFilters: any
+  isFiltersModalOpen: boolean
 }
 
 const initialState = {
@@ -18,6 +20,8 @@ const initialState = {
   searchQuery: "",
   results: [],
   error: "",
+  selectedFilters: null,
+  isFiltersModalOpen: false
 }
 
 export const signIn = createAsyncThunk(
@@ -86,6 +90,13 @@ export const searchSlice = createSlice({
     setResults: (state, action) => {
       state.results = action.payload
     },
+    setFilters: (state, action) => {
+      state.selectedFilters = action.payload
+    },
+    setIsFiltersModalOpen: (state, action) => {
+      state.isFiltersModalOpen = action.payload
+    }
+
   },
   extraReducers: (builder) => {
     builder
@@ -136,6 +147,8 @@ export const {
   clearError,
   setSearchQuery,
   setResults,
+  setFilters,
+  setIsFiltersModalOpen
 } = searchSlice.actions
 
 export const selectCurrentUser = (state: any) => state.search.currentUser

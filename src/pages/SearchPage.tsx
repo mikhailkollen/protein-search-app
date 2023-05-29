@@ -3,19 +3,23 @@ import { useNavigate } from "react-router-dom"
 import { onAuthStateChanged } from "firebase/auth"
 import styled from "styled-components"
 
-import { useAppDispatch } from "../app/hooks"
+import { useAppDispatch, useAppSelector } from "../app/hooks"
 import FiltersIcon from "../assets/FiltersIcon"
 import Header from "../components/Header"
 import TableWithReactQuery from "../components/Table"
-import { setCurrentUser, setSearchQuery } from "../features/search/searchSlice"
+import { setCurrentUser, setSearchQuery, setIsFiltersModalOpen } from "../features/search/searchSlice"
+import FiltersModal from "../components/FiltersModal"
 import { auth } from "../firebase"
 
 const SearchPage = () => {
   const navigate = useNavigate()
   const dispatch = useAppDispatch()
+
   const searchInputRef = useRef<HTMLInputElement>(null)
   const queryParam = new URLSearchParams(window.location.search)
   const urlSearchQuery = queryParam.get("query")
+  
+  const isFiltersModalOpen = useAppSelector((state) => state.search.isFiltersModalOpen)
 
   useEffect(() => {
     if (urlSearchQuery && searchInputRef.current) {
@@ -23,6 +27,10 @@ const SearchPage = () => {
       dispatch(setSearchQuery(urlSearchQuery))
     }
   }, [urlSearchQuery, searchInputRef])
+
+  const toggleFiltersModal = () => {
+    dispatch(setIsFiltersModalOpen(!isFiltersModalOpen))
+  };
 
   const handleFormSubmit = (event: any) => {
     event.preventDefault()
@@ -58,17 +66,22 @@ const SearchPage = () => {
     <Wrapper>
       <Header />
       <main>
-        <form onSubmit={handleFormSubmit}>
+        <div className="form-container">
+          <form onSubmit={handleFormSubmit}>
           <input
             type="text"
             placeholder="Enter search value"
             ref={searchInputRef}
           />
           <button type="submit">{"Search"}</button>
-          <button type="button">
+          <button type="button" onClick={toggleFiltersModal} >
             <FiltersIcon />
           </button>
         </form>
+          {isFiltersModalOpen && <FiltersModal />}
+        </div>
+        
+        
         <div className="table-container">
           <TableWithReactQuery />
         </div>
@@ -90,12 +103,18 @@ const Wrapper = styled.section`
     width: 80%;
     height: 100%;
     margin-top: 30px;
+    .form-container {
+      position: relative;
+      width: 100%;
+
+    }
     form {
       width: 100%;
       display: flex;
       justify-content: space-between;
       align-items: center;
       gap: 9px;
+      position: relative;
       input {
         width: 80%;
         border: 1px solid var(--light-grey);
