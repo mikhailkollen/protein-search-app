@@ -6,7 +6,7 @@ import {
   QueryClientProvider,
   useInfiniteQuery,
 } from "@tanstack/react-query"
-import { useVirtualizer } from '@tanstack/react-virtual'
+import { useVirtual } from 'react-virtual'
 
 
 import {
@@ -368,20 +368,18 @@ const Table = () => {
 
   const { rows } = table.getRowModel()
   //  const totalDBRowCount = data?.totalResults;
-
-   const rowVirtualizer = useVirtualizer({
-    count: 10000,
-    getScrollElement: () => tableContainerRef.current,
-    estimateSize: () => 35,
+const rowVirtualizer = useVirtual({
+    parentRef: tableContainerRef,
+    size: rows.length,
+    overscan: 10,
   })
-  const virtualRows = rowVirtualizer.getVirtualItems();
-  console.log(virtualRows);
+  const { virtualItems: virtualRows, totalSize } = rowVirtualizer
+  const paddingTop = virtualRows.length > 0 ? virtualRows?.[0]?.start || 0 : 0
+  const paddingBottom =
+    virtualRows.length > 0
+      ? totalSize - (virtualRows?.[virtualRows.length - 1]?.end || 0)
+      : 0
   
-  // const paddingTop = virtualRows.length > 0 ? virtualRows?.[0]?.start || 0 : 0
-  // const paddingBottom =
-  //   virtualRows.length > 0
-  //     ? totalSize - (virtualRows?.[virtualRows.length - 1]?.end || 0)
-  //     : 0
 
   if (isLoading) {
     return <React.Fragment>{"Loading..."}</React.Fragment>
@@ -453,15 +451,15 @@ const Table = () => {
               ))}
             </thead>
             <tbody>
-              {/* {paddingTop > 0 && (
+              {paddingTop > 0 && (
               <tr>
                 <td style={{ height: `${paddingTop}px` }} />
               </tr>
-            )} */}
-              {rows.map((virtualRow) => {
+            )}
+              {virtualRows.map((virtualRow) => {
                 const row = rows[virtualRow.index] as Row<any>
-
-                return (
+                if (row) {
+                  return (
                   <tr key={row.id}>
                     {row.getVisibleCells().map((cell) => {
                       return (
@@ -475,12 +473,14 @@ const Table = () => {
                     })}
                   </tr>
                 )
+                }
+                
               })}
-               {/* {paddingBottom > 0 && (
+               {paddingBottom > 0 && (
               <tr>
                 <td style={{ height: `${paddingBottom}px` }} />
               </tr>
-            )} */}
+            )}
             </tbody>
           </table>
         </div>

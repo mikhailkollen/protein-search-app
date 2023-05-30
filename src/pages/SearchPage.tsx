@@ -5,10 +5,16 @@ import styled from "styled-components"
 
 import { useAppDispatch, useAppSelector } from "../app/hooks"
 import FiltersIcon from "../assets/FiltersIcon"
-import Header from "../components/Header"
-import TableWithReactQuery from "../components/Table"
-import { setCurrentUser, setSearchQuery, setIsFiltersModalOpen } from "../features/search/searchSlice"
 import FiltersModal from "../components/FiltersModal"
+import Header from "../components/Header"
+import TableWithReactQuery from "../components/VirtualizedTable"
+
+import {
+  setCurrentUser,
+  setFilters,
+  setIsFiltersModalOpen,
+  setSearchQuery,
+} from "../features/search/searchSlice"
 import { auth } from "../firebase"
 
 const SearchPage = () => {
@@ -18,8 +24,10 @@ const SearchPage = () => {
   const searchInputRef = useRef<HTMLInputElement>(null)
   const queryParam = new URLSearchParams(window.location.search)
   const urlSearchQuery = queryParam.get("query")
-  
-  const isFiltersModalOpen = useAppSelector((state) => state.search.isFiltersModalOpen)
+
+  const isFiltersModalOpen = useAppSelector(
+    (state) => state.search.isFiltersModalOpen,
+  )
 
   useEffect(() => {
     if (urlSearchQuery && searchInputRef.current) {
@@ -30,11 +38,13 @@ const SearchPage = () => {
 
   const toggleFiltersModal = () => {
     dispatch(setIsFiltersModalOpen(!isFiltersModalOpen))
-  };
+  }
 
   const handleFormSubmit = (event: any) => {
     event.preventDefault()
     const searchValue = searchInputRef.current?.value
+
+    dispatch(setFilters(null))
 
     if (!searchValue) {
       dispatch(setSearchQuery("*"))
@@ -68,20 +78,19 @@ const SearchPage = () => {
       <main>
         <div className="form-container">
           <form onSubmit={handleFormSubmit}>
-          <input
-            type="text"
-            placeholder="Enter search value"
-            ref={searchInputRef}
-          />
-          <button type="submit">{"Search"}</button>
-          <button type="button" onClick={toggleFiltersModal} >
-            <FiltersIcon />
-          </button>
-        </form>
+            <input
+              type="text"
+              placeholder="Enter search value"
+              ref={searchInputRef}
+            />
+            <button type="submit">{"Search"}</button>
+            <button type="button" onClick={toggleFiltersModal}>
+              <FiltersIcon />
+            </button>
+          </form>
           {isFiltersModalOpen && <FiltersModal />}
         </div>
-        
-        
+
         <div className="table-container">
           <TableWithReactQuery />
         </div>
@@ -106,7 +115,6 @@ const Wrapper = styled.section`
     .form-container {
       position: relative;
       width: 100%;
-
     }
     form {
       width: 100%;
