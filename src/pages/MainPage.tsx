@@ -1,11 +1,24 @@
-import { useCallback } from "react"
+import { useCallback, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import styled from "styled-components"
 
 import backgroundImg from "../assets/background-img.png"
+import { auth } from "../firebase"
 
 const MainPage = () => {
   const navigate = useNavigate()
+
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      if (user) {
+        navigate("/search")
+      }
+    })
+
+    return () => {
+      unsubscribe()
+    }
+  }, [navigate])
 
   const handleClick = useCallback(() => {
     navigate("/auth")
