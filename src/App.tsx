@@ -31,7 +31,7 @@ const ProtectedRoute = ({ element: Component, ...rest }: any) => {
         setAuthenticated(true)
       } else {
         setAuthenticated(false)
-        navigate("/auth", { state: { from: location.pathname } })
+        navigate("/auth", { state: { from: location } })
       }
 
       setLoading(false)
