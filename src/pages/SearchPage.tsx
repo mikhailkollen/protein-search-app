@@ -21,9 +21,12 @@ const SearchPage = () => {
   const navigate = useNavigate()
   const dispatch = useAppDispatch()
 
+
   const searchInputRef = useRef<HTMLInputElement>(null)
   const queryParam = new URLSearchParams(window.location.search)
   const urlSearchQuery = queryParam.get("query")
+
+
 
   const isFiltersModalOpen = useAppSelector(
     (state) => state.search.isFiltersModalOpen,
@@ -34,7 +37,33 @@ const SearchPage = () => {
       searchInputRef.current.value = urlSearchQuery
       dispatch(setSearchQuery(urlSearchQuery))
     }
+
+    // if (urlFilters) {
+    //   const decodedFilters = decodeURIComponent(urlFilters);
+    //   console.log(decodedFilters);
+      
+    //   dispatch(setFilters(JSON.parse(decodedFilters)))
+    // }
   }, [urlSearchQuery, searchInputRef])
+
+  // useEffect(() => {
+  //   const queryParam = new URLSearchParams(window.location.search)
+
+  //   if (selectedFilters) {
+  //     console.log(queryParam);
+      
+  //     queryParam.set("filters", JSON.stringify(selectedFilters))
+  //   } else {
+  //     queryParam.delete("filters")
+  //   }
+
+  //   window.history.replaceState(
+  //     {},
+  //     "",
+  //     `${window.location.pathname}?${queryParam}`,
+  //   )
+    
+  // }, [selectedFilters])
 
   const toggleFiltersModal = () => {
     dispatch(setIsFiltersModalOpen(!isFiltersModalOpen))
@@ -45,6 +74,7 @@ const SearchPage = () => {
     const searchValue = searchInputRef.current?.value
 
     dispatch(setFilters(null))
+    dispatch(setIsFiltersModalOpen(false))
 
     if (!searchValue) {
       dispatch(setSearchQuery("*"))

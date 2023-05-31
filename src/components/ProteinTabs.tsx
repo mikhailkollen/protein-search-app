@@ -4,7 +4,7 @@ import { Link } from "react-router-dom"
 import Box from "@mui/material/Box"
 import Tab from "@mui/material/Tab"
 import Tabs from "@mui/material/Tabs"
-// import ProtvistaUniprot from "protvista-uniprot"
+import ProtvistaUniprot from 'protvista-uniprot';
 import styled from "styled-components"
 
 import CopyIcon from "../assets/CopyIcon"
@@ -18,7 +18,7 @@ declare global {
   }
 }
 
-// window.customElements.define("protvista-uniprot", ProtvistaUniprot as any)
+window.customElements.define("protvista-uniprot", ProtvistaUniprot as any)
 
 interface TabPanelProps {
   children?: React.ReactNode
@@ -184,7 +184,7 @@ const ProteinTabs: React.FC<ProteinTabsProps> = ({ data }) => {
         </div>
       </TabPanel>
       <TabPanel value={value} index={1}>
-        <div>{/* <protvista-uniprot accession={data.accession} /> */}</div>
+        <div><protvista-uniprot accession={data.accession} /></div>
       </TabPanel>
       <TabPanel value={value} index={2}>
         <div className="publications">

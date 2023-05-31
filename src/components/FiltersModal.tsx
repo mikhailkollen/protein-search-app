@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import styled from "styled-components"
 
 import { useAppDispatch, useAppSelector } from "../app/hooks"
@@ -13,13 +13,14 @@ const FiltersModal = () => {
   const [dynamicFilters, setDynamicFilters] = useState<any>([])
   const [selectedFilters, setSelectedFilters] = useState<any>([])
 
-  const [lengthFilter, setLengthFilter] = useState<any>({
-    min: null,
-    max: null,
-  })
+  const [lengthFilterOptions, setLengthFilterOptions] = useState<any>({})
 
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [noFilters, setNoFilters] = useState<boolean>(false)
+
+  const minLengthRef = useRef<HTMLInputElement>(null)
+  const maxLengthRef = useRef<HTMLInputElement>(null)
+
 
   const [url, setUrl] = useState<any>(
     `https://rest.uniprot.org/uniprotkb/search?facets=model_organism,proteins_with,annotation_score&query=(${
@@ -28,6 +29,14 @@ const FiltersModal = () => {
       appliedFilters
         ? (appliedFilters as any)
             ?.map((filter: any) => {
+              if (filter.name === "length") {
+          console.log(filter, filter.minLength, filter.maxLength);
+          
+          
+
+
+          return `%20AND%20(${filter.name}:%5B${filter.minLength}%20TO%20${filter.maxLength}%5D)`
+        }
               return `%20AND%20(${filter.name}:${filter.value})`
             })
             .join("")
@@ -38,12 +47,21 @@ const FiltersModal = () => {
   const dispatch = useAppDispatch()
 
   useEffect(() => {
-    {
-      appliedFilters && setSelectedFilters(appliedFilters)
+    if (appliedFilters) {
+      setSelectedFilters(appliedFilters)
     }
+
+
+
+    
 
     const filters = (appliedFilters as any)
       ?.map((filter: any) => {
+        if (filter.name === "length") {
+          console.log(filter, filter.minLength, filter.maxLength);
+          
+          return `%20AND%20(${filter.name}:%5B${filter.minLength}%20TO%20${filter.maxLength}%5D)`
+        }
         return `%20AND%20(${filter.name}:${filter.value})`
       })
       .join("")
@@ -60,16 +78,21 @@ const FiltersModal = () => {
       setIsLoading(true)
 
       const filters = (selectedFilters as any)
-        ?.map((filter: any) => {
-          if (filter.name === "length") {
-            return `%20AND%20(${filter.name}:%5B${filter.value}%20TO%20${filter.value}%5D)`
-          }
+  ?.map((filter: any) => {
+    console.log(filters);
+    
+    if (filter.name === "length") {
+      const { minLength, maxLength } = filter;
+     
+      
+      return `%20AND%20(${filter.name}:%5B${minLength}%20TO%20${maxLength}%5D)`
+    }
+    return `%20AND%20(${filter.name}:${filter.value})`
+  })
+  .join("")
+      console.log(filters)
 
-          return `%20AND%20(${filter.name}:${filter.value})`
-        })
-        .join("")
-
-      const response = await fetch(`${url}${appliedFilters ? filters : ""}`)
+      const response = await fetch(`${url}${appliedFilters && filters}`)
 
       console.log(url)
 
@@ -86,7 +109,7 @@ const FiltersModal = () => {
       const minLength = minLengthData.results[0].sequence.length
       const maxLength = maxLengthData.results[0].sequence.length
 
-      setLengthFilter({ min: minLength, max: maxLength })
+      setLengthFilterOptions({ min: minLength, max: maxLength })
       const data = await response.json()
 
       const dynamicFilters = data.facets.map((facet: any) => {
@@ -155,10 +178,29 @@ const FiltersModal = () => {
   }
 
   const handleSubmit = (event: any) => {
-    event.preventDefault()
-    dispatch(setFilters(selectedFilters))
-    dispatch(setIsFiltersModalOpen(false))
+  event.preventDefault();
+  
+  if (minLengthRef.current && maxLengthRef.current && (minLengthRef.current.value || maxLengthRef.current.value)) {
+    const minLength = minLengthRef.current.value;
+    const maxLength = maxLengthRef.current.value;
+    
+    const filter = { name: "length", minLength, maxLength };
+    
+    
+    dispatch(setFilters([...selectedFilters, filter]));
+    dispatch(setIsFiltersModalOpen(false));
+    return;
   }
+
+  if (selectedFilters.length === 0 || !selectedFilters ) {
+    dispatch(setFilters(null));
+    dispatch(setIsFiltersModalOpen(false));
+    return;
+  }
+
+  dispatch(setFilters(selectedFilters));
+  dispatch(setIsFiltersModalOpen(false));
+};
 
   useEffect(() => {
     getDynamicFilters().then((data) => {
@@ -202,10 +244,11 @@ const FiltersModal = () => {
                 <label htmlFor={filter.name}>{filter.label}</label>
                 <select
                   name={filter.name}
-                  defaultValue={filter.values[0].value}
+                  defaultValue=""
                   id={filter.name}
                   onChange={(e) => handleFilterChange(e)}
                 >
+                  <option value="" disabled> {"Select an option"} </option>
                   {filter.values.map((value: any) => {
                     return (
                       <option
@@ -213,7 +256,7 @@ const FiltersModal = () => {
                         key={`${value?.label}${value.value}${value?.count}`}
                       >
                         {value.label ? value.label : value.value}
-                        {" ("}
+                        {" ("}{value?.count}
                         {")"}
                       </option>
                     )
@@ -230,20 +273,20 @@ const FiltersModal = () => {
                 type="number"
                 id="length"
                 name="minLength"
-                min={lengthFilter.min && lengthFilter.min}
-                max={lengthFilter.max && lengthFilter.max}
-                defaultValue={lengthFilter.min && lengthFilter.min}
-                onChange={(e) => handleFilterChange(e)}
+                min={lengthFilterOptions.min && lengthFilterOptions.min}
+                ref={minLengthRef}
+                max={lengthFilterOptions.max && lengthFilterOptions.max}
+                defaultValue={lengthFilterOptions.min && lengthFilterOptions.min}
               />
               <hr />
               <input
                 type="number"
                 name="maxLength"
                 id="length"
-                min={lengthFilter.min && lengthFilter.min}
-                max={lengthFilter.max && lengthFilter.max}
-                defaultValue={lengthFilter.max && lengthFilter.max}
-                onChange={(e) => handleFilterChange(e)}
+                ref={maxLengthRef}
+                min={lengthFilterOptions.min && lengthFilterOptions.min}
+                max={lengthFilterOptions.max && lengthFilterOptions.max}
+                defaultValue={lengthFilterOptions.max && lengthFilterOptions.max}
               />
             </div>
           </div>
