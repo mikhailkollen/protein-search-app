@@ -21,7 +21,6 @@ const FiltersModal = () => {
   const minLengthRef = useRef<HTMLInputElement>(null)
   const maxLengthRef = useRef<HTMLInputElement>(null)
 
-
   const [url, setUrl] = useState<any>(
     `https://rest.uniprot.org/uniprotkb/search?facets=model_organism,proteins_with,annotation_score&query=(${
       searchQuery || "*"
@@ -30,13 +29,9 @@ const FiltersModal = () => {
         ? (appliedFilters as any)
             ?.map((filter: any) => {
               if (filter.name === "length") {
-          console.log(filter, filter.minLength, filter.maxLength);
-          
-          
+                return `%20AND%20(${filter.name}:%5B${filter.minLength}%20TO%20${filter.maxLength}%5D)`
+              }
 
-
-          return `%20AND%20(${filter.name}:%5B${filter.minLength}%20TO%20${filter.maxLength}%5D)`
-        }
               return `%20AND%20(${filter.name}:${filter.value})`
             })
             .join("")
@@ -51,17 +46,12 @@ const FiltersModal = () => {
       setSelectedFilters(appliedFilters)
     }
 
-
-
-    
-
     const filters = (appliedFilters as any)
       ?.map((filter: any) => {
         if (filter.name === "length") {
-          console.log(filter, filter.minLength, filter.maxLength);
-          
           return `%20AND%20(${filter.name}:%5B${filter.minLength}%20TO%20${filter.maxLength}%5D)`
         }
+
         return `%20AND%20(${filter.name}:${filter.value})`
       })
       .join("")
@@ -78,23 +68,18 @@ const FiltersModal = () => {
       setIsLoading(true)
 
       const filters = (selectedFilters as any)
-  ?.map((filter: any) => {
-    console.log(filters);
-    
-    if (filter.name === "length") {
-      const { minLength, maxLength } = filter;
-     
-      
-      return `%20AND%20(${filter.name}:%5B${minLength}%20TO%20${maxLength}%5D)`
-    }
-    return `%20AND%20(${filter.name}:${filter.value})`
-  })
-  .join("")
-      console.log(filters)
+        ?.map((filter: any) => {
+          if (filter.name === "length") {
+            const { minLength, maxLength } = filter
+
+            return `%20AND%20(${filter.name}:%5B${minLength}%20TO%20${maxLength}%5D)`
+          }
+
+          return `%20AND%20(${filter.name}:${filter.value})`
+        })
+        .join("")
 
       const response = await fetch(`${url}${appliedFilters && filters}`)
-
-      console.log(url)
 
       const minLengthResponse = await fetch(
         `${url}${appliedFilters ? filters : ""}&size=1&sort=length%20asc`,
@@ -140,8 +125,6 @@ const FiltersModal = () => {
   const handleFilterChange = (event: any) => {
     const { name, value } = event.target
 
-    console.log(name, value)
-
     if (name === "minLength" || name === "maxLength") {
       const filter = { name: "length", value: `${value}:${value}` }
 
@@ -178,29 +161,34 @@ const FiltersModal = () => {
   }
 
   const handleSubmit = (event: any) => {
-  event.preventDefault();
-  
-  if (minLengthRef.current && maxLengthRef.current && (minLengthRef.current.value || maxLengthRef.current.value)) {
-    const minLength = minLengthRef.current.value;
-    const maxLength = maxLengthRef.current.value;
-    
-    const filter = { name: "length", minLength, maxLength };
-    
-    
-    dispatch(setFilters([...selectedFilters, filter]));
-    dispatch(setIsFiltersModalOpen(false));
-    return;
-  }
+    event.preventDefault()
 
-  if (selectedFilters.length === 0 || !selectedFilters ) {
-    dispatch(setFilters(null));
-    dispatch(setIsFiltersModalOpen(false));
-    return;
-  }
+    if (
+      minLengthRef.current &&
+      maxLengthRef.current &&
+      (minLengthRef.current.value || maxLengthRef.current.value)
+    ) {
+      const minLength = minLengthRef.current.value
+      const maxLength = maxLengthRef.current.value
 
-  dispatch(setFilters(selectedFilters));
-  dispatch(setIsFiltersModalOpen(false));
-};
+      const filter = { name: "length", minLength, maxLength }
+
+      dispatch(setFilters([...selectedFilters, filter]))
+      dispatch(setIsFiltersModalOpen(false))
+
+      return
+    }
+
+    if (selectedFilters.length === 0 || !selectedFilters) {
+      dispatch(setFilters(null))
+      dispatch(setIsFiltersModalOpen(false))
+
+      return
+    }
+
+    dispatch(setFilters(selectedFilters))
+    dispatch(setIsFiltersModalOpen(false))
+  }
 
   useEffect(() => {
     getDynamicFilters().then((data) => {
@@ -248,7 +236,10 @@ const FiltersModal = () => {
                   id={filter.name}
                   onChange={(e) => handleFilterChange(e)}
                 >
-                  <option value="" disabled> {"Select an option"} </option>
+                  <option value="" disabled>
+                    {" "}
+                    {"Select an option"}{" "}
+                  </option>
                   {filter.values.map((value: any) => {
                     return (
                       <option
@@ -256,7 +247,8 @@ const FiltersModal = () => {
                         key={`${value?.label}${value.value}${value?.count}`}
                       >
                         {value.label ? value.label : value.value}
-                        {" ("}{value?.count}
+                        {" ("}
+                        {value?.count}
                         {")"}
                       </option>
                     )
@@ -276,7 +268,9 @@ const FiltersModal = () => {
                 min={lengthFilterOptions.min && lengthFilterOptions.min}
                 ref={minLengthRef}
                 max={lengthFilterOptions.max && lengthFilterOptions.max}
-                defaultValue={lengthFilterOptions.min && lengthFilterOptions.min}
+                defaultValue={
+                  lengthFilterOptions.min && lengthFilterOptions.min
+                }
               />
               <hr />
               <input
@@ -286,7 +280,9 @@ const FiltersModal = () => {
                 ref={maxLengthRef}
                 min={lengthFilterOptions.min && lengthFilterOptions.min}
                 max={lengthFilterOptions.max && lengthFilterOptions.max}
-                defaultValue={lengthFilterOptions.max && lengthFilterOptions.max}
+                defaultValue={
+                  lengthFilterOptions.max && lengthFilterOptions.max
+                }
               />
             </div>
           </div>

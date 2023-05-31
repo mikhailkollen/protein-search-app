@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react"
 import { Link } from "react-router-dom"
 import styled from "styled-components"
-
 import Header from "../components/Header"
 import { auth } from "../firebase"
 
@@ -20,7 +19,7 @@ const ErrorPage = () => {
     return () => {
       unsubscribe()
     }
-  }, [auth.currentUser])
+  }, [])
 
   return (
     <Wrapper>

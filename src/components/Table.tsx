@@ -1,14 +1,12 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { Link } from "react-router-dom"
+import { useVirtual } from "react-virtual"
 import {
   QueryClient,
   QueryClientProvider,
   useInfiniteQuery,
 } from "@tanstack/react-query"
-import { useVirtualizer } from '@tanstack/react-virtual'
-
-
 import {
   flexRender,
   getCoreRowModel,
@@ -19,10 +17,11 @@ import {
 } from "@tanstack/react-table"
 import styled from "styled-components"
 
-import { useAppSelector } from "../app/hooks"
+import { useAppDispatch, useAppSelector } from "../app/hooks"
 import SortIconAsc from "../assets/SortIconAsc"
 import SortIconDesc from "../assets/SortIconDesc"
 import SortIconInactive from "../assets/SortIconInactive"
+import { setFilters } from "../features/search/searchSlice"
 
 const fetchSize = 25
 
@@ -107,12 +106,13 @@ const Table = () => {
   )
 
   const navigate = useNavigate()
+  const dispatch = useAppDispatch()
+
   const tableContainerRef = React.useRef<HTMLDivElement>(null)
 
   const [sorting, setSorting] = useState<SortingState>([])
   const [cursor, setCursor] = useState<string | undefined>("")
   const [globalFilter, setGlobalFilter] = useState<string>("")
-  const [query, setQuery] = useState<string>(searchQuery || "*")
   const [hasElements, setHasElements] = useState(false)
   const [totalResults, setTotalResults] = useState("0")
   const [sort, setSort] = useState({ id: "", type: "" })
@@ -126,16 +126,12 @@ const Table = () => {
       const [id, type] = decoded.split(" ")
 
       setSort({ id, type })
-      console.log("id", id)
-      console.log("type", type)
     }
   }, [])
 
   useEffect(() => {
     const queryParams = new URLSearchParams(window.location.search)
     const sortValue = queryParams.get("sort") ?? sort.id
-
-    console.log(sort)
 
     if (sortValue && sort.id !== "") {
       queryParams.set("sort", `${sort.id} ${sort.type}`)
@@ -145,6 +141,32 @@ const Table = () => {
 
     updateQueryParam(queryParams)
   }, [sort])
+
+  useEffect(() => {
+    const queryParams = new URLSearchParams(window.location.search)
+    const urlFilters = queryParams.get("filters") ?? ""
+
+    if (urlFilters && selectedFilters === null) {
+      const decoded = decodeURIComponent(urlFilters)
+      const filters = JSON.parse(decoded)
+
+      dispatch(setFilters(filters))
+    }
+  }, [])
+
+  useEffect(() => {
+    const queryParams = new URLSearchParams(window.location.search)
+
+    if (selectedFilters === null) {
+      queryParams.delete("filters")
+    } else {
+      const encoded = encodeURIComponent(JSON.stringify(selectedFilters))
+
+      queryParams.set("filters", encoded)
+    }
+
+    updateQueryParam(queryParams)
+  }, [selectedFilters])
 
   const handleSort = (id: string) => {
     setCursor("")
@@ -161,28 +183,12 @@ const Table = () => {
   }
 
   useEffect(() => {
-    setQuery(searchQuery || "*")
     setCursor("")
-    console.log(selectedFilters)
   }, [searchQuery, selectedFilters])
-
-  useEffect(() => {
-    const queryParams = new URLSearchParams(window.location.search)
-
-    if (query === "*") {
-      queryParams.delete("query")
-    } else {
-      queryParams.set("query", query)
-    }
-
-    updateQueryParam(queryParams)
-  }, [query])
 
   const updateQueryParam = useCallback(
     (params: URLSearchParams) => {
       const search = params.toString()
-
-      console.log(search)
 
       navigate({ search })
     },
@@ -200,9 +206,23 @@ const Table = () => {
         queryParams.set("query", query)
       }
 
+      if (selectedFilters === null) {
+        queryParams.delete("filters")
+      } else {
+        const encoded = encodeURIComponent(JSON.stringify(selectedFilters))
+
+        queryParams.set("filters", encoded)
+      }
+
       const filters = (selectedFilters as any)
         ?.map((filter: any) => {
           if (filter.name === "length") {
+            if (filter.name === "length") {
+              const { minLength, maxLength } = filter
+
+              return `%20AND%20(${filter.name}:%5B${minLength}%20TO%20${maxLength}%5D)`
+            }
+
             return `%20AND%20(${filter.name}:%5B${filter.value}%20TO%20${filter.value}%5D)`
           }
 
@@ -215,8 +235,6 @@ const Table = () => {
       })${selectedFilters ? filters : ""}${
         pageParam ? `&cursor=${pageParam}` : ""
       }&size=${fetchSize}${sort.id ? `&sort=${sort.id}%20${sort.type}` : ""}`
-
-      console.log(url)
 
       const response = await fetch(url)
       const link = response.headers.get("Link")
@@ -303,20 +321,19 @@ const Table = () => {
     ],
   )
 
-  const { data, fetchNextPage, isFetching, isLoading } =
-    useInfiniteQuery({
-      queryKey: ["table-data", globalFilter, sorting, sort, selectedFilters],
-      queryFn: fetchData,
-      getNextPageParam: (lastPage) => {
-        if (lastPage.results.length < fetchSize) {
-          return
-        }
+  const { data, fetchNextPage, isFetching, isLoading } = useInfiniteQuery({
+    queryKey: ["table-data", globalFilter, sorting, sort, selectedFilters],
+    queryFn: fetchData,
+    getNextPageParam: (lastPage) => {
+      if (lastPage.results.length < fetchSize) {
+        return
+      }
 
-        return lastPage.nextCursor
-      },
-      keepPreviousData: true,
-      refetchOnWindowFocus: false,
-    })
+      return lastPage.nextCursor
+    },
+    keepPreviousData: true,
+    refetchOnWindowFocus: false,
+  })
 
   const flatData = useMemo(
     () => data?.pages.flatMap((page) => page.results) ?? [],
@@ -367,21 +384,20 @@ const Table = () => {
   })
 
   const { rows } = table.getRowModel()
-  //  const totalDBRowCount = data?.totalResults;
 
-   const rowVirtualizer = useVirtualizer({
-    count: 10000,
-    getScrollElement: () => tableContainerRef.current,
-    estimateSize: () => 35,
+  const rowVirtualizer = useVirtual({
+    parentRef: tableContainerRef,
+    size: rows.length,
+    overscan: 10,
   })
-  const virtualRows = rowVirtualizer.getVirtualItems();
-  console.log(virtualRows);
-  
-  // const paddingTop = virtualRows.length > 0 ? virtualRows?.[0]?.start || 0 : 0
-  // const paddingBottom =
-  //   virtualRows.length > 0
-  //     ? totalSize - (virtualRows?.[virtualRows.length - 1]?.end || 0)
-  //     : 0
+
+  const { virtualItems: virtualRows, totalSize } = rowVirtualizer
+  const paddingTop = virtualRows.length > 0 ? virtualRows?.[0]?.start || 0 : 0
+
+  const paddingBottom =
+    virtualRows.length > 0
+      ? totalSize - (virtualRows?.[virtualRows.length - 1]?.end || 0)
+      : 0
 
   if (isLoading) {
     return <React.Fragment>{"Loading..."}</React.Fragment>
@@ -453,34 +469,36 @@ const Table = () => {
               ))}
             </thead>
             <tbody>
-              {/* {paddingTop > 0 && (
-              <tr>
-                <td style={{ height: `${paddingTop}px` }} />
-              </tr>
-            )} */}
-              {rows.map((virtualRow) => {
+              {paddingTop > 0 && (
+                <tr>
+                  <td style={{ height: `${paddingTop}px` }} />
+                </tr>
+              )}
+              {virtualRows.map((virtualRow) => {
                 const row = rows[virtualRow.index] as Row<any>
 
-                return (
-                  <tr key={row.id}>
-                    {row.getVisibleCells().map((cell) => {
-                      return (
-                        <td key={cell.id}>
-                          {flexRender(
-                            cell.column.columnDef.cell,
-                            cell.getContext(),
-                          )}
-                        </td>
-                      )
-                    })}
-                  </tr>
-                )
+                if (row) {
+                  return (
+                    <tr key={row.id}>
+                      {row.getVisibleCells().map((cell) => {
+                        return (
+                          <td key={cell.id}>
+                            {flexRender(
+                              cell.column.columnDef.cell,
+                              cell.getContext(),
+                            )}
+                          </td>
+                        )
+                      })}
+                    </tr>
+                  )
+                }
               })}
-               {/* {paddingBottom > 0 && (
-              <tr>
-                <td style={{ height: `${paddingBottom}px` }} />
-              </tr>
-            )} */}
+              {paddingBottom > 0 && (
+                <tr>
+                  <td style={{ height: `${paddingBottom}px` }} />
+                </tr>
+              )}
             </tbody>
           </table>
         </div>

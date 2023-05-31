@@ -1,10 +1,8 @@
-import { useCallback, useEffect } from "react"
+import { useCallback } from "react"
 import { useNavigate } from "react-router-dom"
-import { onAuthStateChanged } from "firebase/auth"
 import styled from "styled-components"
 
 import backgroundImg from "../assets/background-img.png"
-import { auth } from "../firebase"
 
 const MainPage = () => {
   const navigate = useNavigate()
@@ -12,20 +10,6 @@ const MainPage = () => {
   const handleClick = useCallback(() => {
     navigate("/auth")
   }, [navigate])
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        navigate("/search")
-      } else {
-        console.log("no user")
-      }
-    })
-
-    return () => {
-      unsubscribe()
-    }
-  }, [auth.currentUser])
 
   return (
     <Wrapper>
@@ -61,7 +45,7 @@ const Wrapper = styled.main`
     gap: 30px;
     max-width: 400px;
     p {
-      color: var(--dark-grey);
+      color: var(--dark-grey-3);
     }
     button {
       border-radius: 24px;

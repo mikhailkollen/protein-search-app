@@ -1,54 +1,20 @@
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { useParams } from "react-router-dom"
-import { useNavigate } from "react-router-dom"
-import { onAuthStateChanged } from "firebase/auth"
 import styled from "styled-components"
+import React from "react"
 
-import { useAppDispatch } from "../app/hooks"
 import Header from "../components/Header"
 import ProteinTabs from "../components/ProteinTabs"
-import { setCurrentUser } from "../features/search/searchSlice"
-import { auth } from "../firebase"
 
 const SingleProteinPage = () => {
-  const { id } = useParams()
-  const dispatch = useAppDispatch()
-  const navigate = useNavigate()
+    const { id } = useParams();
 
-  const [initialLoad, setInitialLoad] = useState(true)
+  const url = `https://rest.uniprot.org/uniprotkb/${id}`;
+  const [data, setData] = useState({} as any);
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        dispatch(setCurrentUser(user.email!))
-      } else {
-        console.log("no user")
-      }
-    })
-
-    return () => {
-      unsubscribe()
-    }
-  }, [auth.currentUser])
-
-  useEffect(() => {
-    if (!initialLoad && auth.currentUser) {
-      navigate(`/protein/${id}`)
-    }
-  }, [id, navigate, initialLoad])
-
-  useEffect(() => {
-    if (auth.currentUser) {
-      setInitialLoad(false)
-    }
-  }, [auth.currentUser])
-
-  const url = `https://rest.uniprot.org/uniprotkb/${id}`
-  const [data, setData] = useState({} as any)
-
-  const fetchSingleProtein = async () => {
-    const response = await fetch(url)
-    const responseData = await response.json()
+  const fetchSingleProtein = useCallback(async () => {
+    const response = await fetch(url);
+    const responseData = await response.json();
 
     setData({
       accession: responseData.primaryAccession || "N/A",
@@ -56,22 +22,22 @@ const SingleProteinPage = () => {
       description:
         responseData.proteinDescription?.recommendedName?.fullName?.value ||
         "N/A",
-      gene: responseData.genes?.[0]?.geneName?.value || "N/A", // Add a check for genes array
+      gene: responseData.genes?.[0]?.geneName?.value || "N/A",
       length: responseData.sequence?.length || "N/A",
       lastUpdated: responseData.entryAudit?.lastAnnotationUpdateDate || "N/A",
       mass: responseData.sequence?.molWeight || "N/A",
       checksum: responseData.sequence?.crc64 || "N/A",
       sequence: responseData.sequence?.value || "N/A",
       organism: responseData.organism?.scientificName || "N/A",
-    })
-  }
+    });
+  }, [url]);
 
   useEffect(() => {
-    fetchSingleProtein()
-  }, [id])
+    fetchSingleProtein();
+  }, [id, fetchSingleProtein]);
 
   return (
-    <>
+    <React.Fragment>
       <Header />
       <Wrapper>
         <main>
@@ -92,7 +58,7 @@ const SingleProteinPage = () => {
           <ProteinTabs data={data} />
         </main>
       </Wrapper>
-    </>
+    </React.Fragment>
   )
 }
 

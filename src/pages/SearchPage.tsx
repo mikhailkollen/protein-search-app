@@ -1,32 +1,23 @@
 import { useEffect, useRef } from "react"
-import { useNavigate } from "react-router-dom"
-import { onAuthStateChanged } from "firebase/auth"
 import styled from "styled-components"
 
 import { useAppDispatch, useAppSelector } from "../app/hooks"
 import FiltersIcon from "../assets/FiltersIcon"
 import FiltersModal from "../components/FiltersModal"
 import Header from "../components/Header"
-import TableWithReactQuery from "../components/VirtualizedTable"
-
+import TableWithReactQuery from "../components/Table"
 import {
-  setCurrentUser,
   setFilters,
   setIsFiltersModalOpen,
   setSearchQuery,
 } from "../features/search/searchSlice"
-import { auth } from "../firebase"
 
 const SearchPage = () => {
-  const navigate = useNavigate()
   const dispatch = useAppDispatch()
-
 
   const searchInputRef = useRef<HTMLInputElement>(null)
   const queryParam = new URLSearchParams(window.location.search)
   const urlSearchQuery = queryParam.get("query")
-
-
 
   const isFiltersModalOpen = useAppSelector(
     (state) => state.search.isFiltersModalOpen,
@@ -37,33 +28,7 @@ const SearchPage = () => {
       searchInputRef.current.value = urlSearchQuery
       dispatch(setSearchQuery(urlSearchQuery))
     }
-
-    // if (urlFilters) {
-    //   const decodedFilters = decodeURIComponent(urlFilters);
-    //   console.log(decodedFilters);
-      
-    //   dispatch(setFilters(JSON.parse(decodedFilters)))
-    // }
-  }, [urlSearchQuery, searchInputRef])
-
-  // useEffect(() => {
-  //   const queryParam = new URLSearchParams(window.location.search)
-
-  //   if (selectedFilters) {
-  //     console.log(queryParam);
-      
-  //     queryParam.set("filters", JSON.stringify(selectedFilters))
-  //   } else {
-  //     queryParam.delete("filters")
-  //   }
-
-  //   window.history.replaceState(
-  //     {},
-  //     "",
-  //     `${window.location.pathname}?${queryParam}`,
-  //   )
-    
-  // }, [selectedFilters])
+  }, [urlSearchQuery, searchInputRef, dispatch])
 
   const toggleFiltersModal = () => {
     dispatch(setIsFiltersModalOpen(!isFiltersModalOpen))
@@ -85,22 +50,6 @@ const SearchPage = () => {
     queryParam.set("query", searchValue)
     dispatch(setSearchQuery(searchValue))
   }
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        dispatch(setCurrentUser(user.email!))
-        navigate("/search")
-      } else {
-        console.log("no user")
-        navigate("/auth")
-      }
-    })
-
-    return () => {
-      unsubscribe()
-    }
-  }, [auth.currentUser])
 
   return (
     <Wrapper>

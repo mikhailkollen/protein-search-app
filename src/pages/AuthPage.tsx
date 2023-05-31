@@ -26,14 +26,13 @@ const AuthPage = () => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
         if (location.state) {
-          
           const { pathname, search } = location.state.from as any
+
           navigate(`${pathname}${search}`)
         } else {
           dispatch(setCurrentUser(user.email!))
-        navigate("/search")
+          navigate("/search")
         }
-        
       } else {
         console.log("no user")
       }
@@ -82,14 +81,13 @@ const AuthPage = () => {
 
     try {
       await dispatch(signIn({ email, password })).then(() => {
-
-        // navigate to the page the user was trying to access before logging in
         if (location.state) {
           const { pathname, search } = location.state.from as any
-          console.log(location.state);
-          
-          console.log(`${pathname}${search}`);
-          
+
+          console.log(location.state)
+
+          console.log(`${pathname}${search}`)
+
           navigate(`${pathname}${search}`)
         } else {
           dispatch(setCurrentUser(auth.currentUser!.email!))
@@ -205,7 +203,7 @@ const AuthPage = () => {
             <button type="submit" disabled={!isFormValid}>
               {isLogin ? "Login" : "Create Account"}
             </button>
-            <p className="error-message">{error ? error : ""}</p>
+            {error && <p className="error-message">{error}</p>}
             <span>
               {isLogin ? "Don't have an account?" : "Already have an account?"}
               <button
