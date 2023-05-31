@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
+    "build": "tsc && vite build --legacy-peer-deps",
     "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "lint:fix": "eslint src --ext ts,tsx --report-unused-disable-directives . --fix",
     "lint:ts": "tsc --noEmit",
@@ -25,8 +25,6 @@
     "react-redux": "^8.0.5",
     "react-router-dom": "^6.11.2",
     "react-virtual": "^2.10.4",
-    "react-virtualized": "^9.22.5",
-    "react-virtualized-auto-sizer": "^1.0.19",
     "react-window": "^1.8.9",
     "styled-components": "^6.0.0-rc.1"
   },

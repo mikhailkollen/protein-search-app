@@ -16,6 +16,7 @@ export default defineConfig({
     commonjsOptions: {
       ignore: ["protvista-uniprot"],
   },
+
   },
 
   plugins: [react()],
