@@ -16,10 +16,6 @@ export default defineConfig({
     commonjsOptions: {
       ignore: ["protvista-uniprot"],
   },
-  
-    rollupOptions: {
-      external: ["protvista-uniprot", "react-virtual"],
-    }
 
   },
 
