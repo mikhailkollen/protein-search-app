@@ -5,19 +5,19 @@ import {
 } from "firebase/auth"
 
 import { auth } from "../../firebase"
+import { Filters, Filter, SearchState } from "../../types"
 
-export interface SearchState {
-  currentUser: any
-  searchQuery: string
-  results: any
-  error: any
-}
 
-const initialState = {
+
+
+
+const initialState: SearchState = {
   currentUser: null,
   searchQuery: "",
   results: [],
   error: "",
+  selectedFilters: null,
+  isFiltersModalOpen: false,
 }
 
 export const signIn = createAsyncThunk(
@@ -86,6 +86,42 @@ export const searchSlice = createSlice({
     setResults: (state, action) => {
       state.results = action.payload
     },
+setFilters: (state, action) => {
+  if (!action.payload) {
+    state.selectedFilters = null;
+    return;
+  }
+
+  const newFilters: Filters = action.payload.reduce((accumulator: Filters, filter: Filter) => {
+    const existingFilterIndex = accumulator.findIndex((f) => f.name === filter.name);
+
+    if (existingFilterIndex !== -1) {
+      const existingFilter = accumulator[existingFilterIndex];
+
+      if (filter.name === "length") {
+        accumulator[existingFilterIndex] = {
+          ...existingFilter,
+          minLength: filter.minLength,
+          maxLength: filter.maxLength,
+        };
+      } else {
+        accumulator[existingFilterIndex] = {
+          ...existingFilter,
+          value: filter.value,
+        };
+      }
+    } else {
+      accumulator.push(filter);
+    }
+
+    return accumulator;
+  }, []);
+
+  state.selectedFilters = newFilters;
+},
+    setIsFiltersModalOpen: (state, action) => {
+      state.isFiltersModalOpen = action.payload
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -136,6 +172,8 @@ export const {
   clearError,
   setSearchQuery,
   setResults,
+  setFilters,
+  setIsFiltersModalOpen,
 } = searchSlice.actions
 
 export const selectCurrentUser = (state: any) => state.search.currentUser
