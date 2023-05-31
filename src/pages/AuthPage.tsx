@@ -7,7 +7,6 @@ import { useAppDispatch, useAppSelector } from "../app/hooks"
 import backgroundImg from "../assets/background-img.png"
 import { setCurrentUser, signIn, signUp } from "../features/search/searchSlice"
 import { auth } from "../firebase"
-import { log } from "console"
 
 const AuthPage = () => {
   const dispatch = useAppDispatch()
