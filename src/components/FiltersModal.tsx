@@ -79,7 +79,7 @@ const FiltersModal = () => {
         })
         .join("")
 
-      const response = await fetch(`${url}${appliedFilters && filters}`)
+      const response = await fetch(`${url}${(appliedFilters !== null) ? filters : ""}`)
 
       const minLengthResponse = await fetch(
         `${url}${appliedFilters ? filters : ""}&size=1&sort=length%20asc`,
@@ -96,7 +96,10 @@ const FiltersModal = () => {
 
       setLengthFilterOptions({ min: minLength, max: maxLength })
       const data = await response.json()
-
+      console.log(`${url}${appliedFilters && filters}`, appliedFilters);
+      
+      console.log(data);
+      
       const dynamicFilters = data.facets.map((facet: any) => {
         return {
           label: facet.label,

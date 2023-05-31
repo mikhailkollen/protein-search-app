@@ -7,8 +7,13 @@ export interface Filter {
 
 export type Filters = Filter[]
 
+export interface User {
+  uid: string
+  email: string | null
+}
+
 export interface SearchState {
-  currentUser: any
+  currentUser: User | null
   searchQuery: string
   results: any
   error: any

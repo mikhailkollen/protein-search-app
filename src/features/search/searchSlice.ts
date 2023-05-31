@@ -19,7 +19,6 @@ const initialState: SearchState = {
 export const signIn = createAsyncThunk(
   "search/signIn",
   async ({ email, password }: any) => {
-    try {
       const userCredential = await signInWithEmailAndPassword(
         auth,
         email,
@@ -29,25 +28,16 @@ export const signIn = createAsyncThunk(
       const { user } = userCredential
 
       return { uid: user.uid, email: user.email }
-    } catch (error) {
-      throw error
-    }
   },
 )
 
 export const signOut = createAsyncThunk("search/signOut", async () => {
-  try {
     await auth.signOut()
-    await console.log(auth.currentUser)
-  } catch (error) {
-    throw error
-  }
 })
 
 export const signUp = createAsyncThunk(
   "search/signUp",
   async ({ email, password }: any) => {
-    try {
       const userCredential = await createUserWithEmailAndPassword(
         auth,
         email,
@@ -57,9 +47,6 @@ export const signUp = createAsyncThunk(
       const { user } = userCredential
 
       return { uid: user.uid, email: user.email }
-    } catch (error) {
-      throw error
-    }
   },
 )
 
@@ -132,7 +119,6 @@ export const searchSlice = createSlice({
       })
       .addCase(signIn.fulfilled, (state: SearchState, action) => {
         state.currentUser = action.payload
-        console.log(action.payload)
       })
       .addCase(signIn.rejected, (state: SearchState, action) => {
         if (action.error.code === "auth/wrong-password") {
@@ -163,7 +149,6 @@ export const searchSlice = createSlice({
       })
       .addCase(signOut.rejected, (state: SearchState, action) => {
         state.error = action.error.message
-        console.log(action.error.message)
       })
   },
 })
