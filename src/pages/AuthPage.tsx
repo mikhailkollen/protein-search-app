@@ -84,10 +84,6 @@ const AuthPage = () => {
         if (location.state) {
           const { pathname, search } = location.state.from as any
 
-          console.log(location.state)
-
-          console.log(`${pathname}${search}`)
-
           navigate(`${pathname}${search}`)
         } else {
           dispatch(setCurrentUser(auth.currentUser!.email!))
@@ -96,8 +92,6 @@ const AuthPage = () => {
       })
     } catch (error_: any) {
       setError(error_.message)
-      console.log(error_.message)
-      console.log("error during auth")
     }
   }
 
@@ -127,10 +121,8 @@ const AuthPage = () => {
 
     try {
       await dispatch(signUp({ email, password }))
-      console.log(auth.currentUser)
     } catch (error_: any) {
       setError(error_.message)
-      console.log(error_.message)
     }
   }
 

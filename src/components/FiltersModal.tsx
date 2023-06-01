@@ -12,6 +12,7 @@ const FiltersModal = () => {
   const appliedFilters = useAppSelector((state) => state.search.selectedFilters)
   const [dynamicFilters, setDynamicFilters] = useState<any>([])
   const [selectedFilters, setSelectedFilters] = useState<any>([])
+  const [hasChanges, setHasChanges] = useState<boolean>(false)
 
   const [lengthFilterOptions, setLengthFilterOptions] = useState<any>({})
 
@@ -96,9 +97,6 @@ const FiltersModal = () => {
 
       setLengthFilterOptions({ min: minLength, max: maxLength })
       const data = await response.json()
-      console.log(`${url}${appliedFilters && filters}`, appliedFilters);
-      
-      console.log(data);
       
       const dynamicFilters = data.facets.map((facet: any) => {
         return {
@@ -127,6 +125,8 @@ const FiltersModal = () => {
 
   const handleFilterChange = (event: any) => {
     const { name, value } = event.target
+    
+    setHasChanges(true)
 
     if (name === "minLength" || name === "maxLength") {
       const filter = { name: "length", value: `${value}:${value}` }
@@ -274,6 +274,13 @@ const FiltersModal = () => {
                 defaultValue={
                   lengthFilterOptions.min && lengthFilterOptions.min
                 }
+                onChange={(e) => {
+                  if (e.target.value !== e.target.defaultValue) {
+                    setHasChanges(true)
+                  } else {
+                    setHasChanges(false)
+                  }
+                }}
               />
               <hr />
               <input
@@ -286,6 +293,13 @@ const FiltersModal = () => {
                 defaultValue={
                   lengthFilterOptions.max && lengthFilterOptions.max
                 }
+                onChange={(e) => {
+                  if (e.target.value !== e.target.defaultValue) {
+                    setHasChanges(true)
+                  } else {
+                    setHasChanges(false)
+                  }
+                }}
               />
             </div>
           </div>
@@ -296,7 +310,7 @@ const FiltersModal = () => {
             >
               {"Cancel"}
             </button>
-            <button type="submit">{"Apply filters"}</button>
+            <button type="submit" disabled={!hasChanges}>{"Apply filters"}</button>
           </div>
         </form>
       ))}
@@ -412,6 +426,12 @@ const Wrapper = styled.div`
       button[type="submit"] {
         padding: 10px 29px;
       }
+
+       button[type="submit"]:disabled {
+    background-color: var(--dark-grey-2);
+    color: var(--white);
+    cursor: not-allowed;
+  }
     }
   }
 `

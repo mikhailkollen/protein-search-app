@@ -69,8 +69,6 @@ const ProteinTabs: React.FC<ProteinTabsProps> = ({ data }) => {
 
     const dataResponse = await response.json()
 
-    console.log(dataResponse.results)
-
     setPublications(dataResponse.results)
 
     return publications
