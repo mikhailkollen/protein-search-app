@@ -80,7 +80,9 @@ const FiltersModal = () => {
         })
         .join("")
 
-      const response = await fetch(`${url}${(appliedFilters !== null) ? filters : ""}`)
+      const response = await fetch(
+        `${url}${appliedFilters !== null ? filters : ""}`,
+      )
 
       const minLengthResponse = await fetch(
         `${url}${appliedFilters ? filters : ""}&size=1&sort=length%20asc`,
@@ -97,7 +99,7 @@ const FiltersModal = () => {
 
       setLengthFilterOptions({ min: minLength, max: maxLength })
       const data = await response.json()
-      
+
       const dynamicFilters = data.facets.map((facet: any) => {
         return {
           label: facet.label,
@@ -125,7 +127,7 @@ const FiltersModal = () => {
 
   const handleFilterChange = (event: any) => {
     const { name, value } = event.target
-    
+
     setHasChanges(true)
 
     if (name === "minLength" || name === "maxLength") {
@@ -310,7 +312,9 @@ const FiltersModal = () => {
             >
               {"Cancel"}
             </button>
-            <button type="submit" disabled={!hasChanges}>{"Apply filters"}</button>
+            <button type="submit" disabled={!hasChanges}>
+              {"Apply filters"}
+            </button>
           </div>
         </form>
       ))}
@@ -427,11 +431,11 @@ const Wrapper = styled.div`
         padding: 10px 29px;
       }
 
-       button[type="submit"]:disabled {
-    background-color: var(--dark-grey-2);
-    color: var(--white);
-    cursor: not-allowed;
-  }
+      button[type="submit"]:disabled {
+        background-color: var(--dark-grey-2);
+        color: var(--white);
+        cursor: not-allowed;
+      }
     }
   }
 `

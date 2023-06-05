@@ -34,7 +34,7 @@ const SearchPage = () => {
     dispatch(setIsFiltersModalOpen(!isFiltersModalOpen))
   }
 
-  const handleFormSubmit = (event: any) => {
+  const handleFormSubmit = (event: React.FormEvent) => {
     event.preventDefault()
     const searchValue = searchInputRef.current?.value
 
