@@ -1,7 +1,8 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { Link } from "react-router-dom"
-import { useVirtual } from "react-virtual"
+import { useVirtualizer } from "@tanstack/react-virtual"
+
 import {
   QueryClient,
   QueryClientProvider,
@@ -385,13 +386,15 @@ const Table = () => {
 
   const { rows } = table.getRowModel()
 
-  const rowVirtualizer = useVirtual({
-    parentRef: tableContainerRef,
-    size: rows.length,
-    overscan: 10,
-  })
+  const virtualizer = useVirtualizer({
+    count: rows.length,
+    getScrollElement: () => tableContainerRef.current,
+    estimateSize: () => 34,
+    overscan: 20
+  });
 
-  const { virtualItems: virtualRows, totalSize } = rowVirtualizer
+  const virtualRows  = virtualizer.getVirtualItems()
+  const totalSize = virtualizer.getTotalSize()
   const paddingTop = virtualRows.length > 0 ? virtualRows?.[0]?.start || 0 : 0
 
   const paddingBottom =

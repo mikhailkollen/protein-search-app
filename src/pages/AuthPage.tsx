@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { ChangeEvent, useEffect, useState } from "react"
 import { useLocation, useNavigate } from "react-router-dom"
 import { onAuthStateChanged } from "firebase/auth"
 import styled from "styled-components"
@@ -15,7 +15,7 @@ const AuthPage = () => {
   const [password, setPassword] = useState("")
   const [passwordConfirm, setPasswordConfirm] = useState("")
   const [email, setEmail] = useState("")
-  const [error, setError] = useState("")
+  const [errorMessage, setErrorMessage] = useState("")
   const navigate = useNavigate()
   const authError = useAppSelector((state) => state.search.error)
 
@@ -26,15 +26,13 @@ const AuthPage = () => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
         if (location.state) {
-          const { pathname, search } = location.state.from as any
+          const { pathname, search } = location.state.from
 
           navigate(`${pathname}${search}`)
         } else {
           dispatch(setCurrentUser(user.email!))
           navigate("/search")
         }
-      } else {
-        console.log("no user")
       }
     })
 
@@ -45,13 +43,9 @@ const AuthPage = () => {
 
   useEffect(() => {
     if (authError) {
-      setError(authError)
+      setErrorMessage(authError)
     }
   }, [authError])
-
-  useEffect(() => {
-    checkFormValidity()
-  }, [isLogin, email, password, passwordConfirm])
 
   const checkFormValidity = () => {
     if (isLogin) {
@@ -63,18 +57,37 @@ const AuthPage = () => {
     }
   }
 
-  const handleSignIn = async (e: any) => {
+  useEffect(() => {
+    checkFormValidity()
+  }, [isLogin, email, password, passwordConfirm])
+
+  const validateEmail = (emailToValidate: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
+    return emailRegex.test(emailToValidate)
+  }
+
+  const validatePassword = (passwordToValidate: string) => {
+    const hasLowerCase = /[a-z]/.test(passwordToValidate)
+    const hasUpperCase = /[A-Z]/.test(passwordToValidate)
+    const hasNumber = /\d/.test(passwordToValidate)
+    const hasMinLength = passwordToValidate.length >= 6
+
+    return hasLowerCase && hasUpperCase && hasNumber && hasMinLength
+  }
+
+  const handleSignInAsync = async (e: React.FormEvent) => {
     e.preventDefault()
-    setError("")
+    setErrorMessage("")
 
     if (!validateEmail(email)) {
-      setError("Please enter a valid email address")
+      setErrorMessage("Please enter a valid email address")
 
       return
     }
 
     if (!validatePassword(password)) {
-      setError("Please enter a valid password")
+      setErrorMessage("Please enter a valid password")
 
       return
     }
@@ -82,31 +95,35 @@ const AuthPage = () => {
     try {
       await dispatch(signIn({ email, password })).then(() => {
         if (location.state) {
-          const { pathname, search } = location.state.from as any
+          const { pathname, search } = location.state.from
 
           navigate(`${pathname}${search}`)
         } else {
           dispatch(setCurrentUser(auth.currentUser!.email!))
           navigate("/search")
         }
+
+        return
       })
-    } catch (error_: any) {
-      setError(error_.message)
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        setErrorMessage(error.message)
+      }
     }
   }
 
-  const handleSignUp = async (e: any) => {
+  const handleSignUpAsync = async (e: React.FormEvent) => {
     e.preventDefault()
-    setError("")
+    setErrorMessage("")
 
     if (!validateEmail(email)) {
-      setError("Please enter a valid email address")
+      setErrorMessage("Please enter a valid email address")
 
       return
     }
 
     if (!validatePassword(password)) {
-      setError(
+      setErrorMessage(
         "Please enter a valid password (min. 6 characters and includes at least one lowercase letter, one uppercase letter, and one number)",
       )
 
@@ -114,50 +131,37 @@ const AuthPage = () => {
     }
 
     if (password !== passwordConfirm) {
-      setError("Passwords do not match")
+      setErrorMessage("Passwords do not match")
 
       return
     }
 
     try {
       await dispatch(signUp({ email, password }))
-    } catch (error_: any) {
-      setError(error_.message)
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        setErrorMessage(error.message)
+      }
     }
   }
 
-  const handleEmailChange = (e: any) => {
+  const handleEmailChange = (e: ChangeEvent<HTMLInputElement>) => {
     setEmail(e.target.value)
   }
 
-  const handlePasswordChange = (e: any) => {
+  const handlePasswordChange = (e: ChangeEvent<HTMLInputElement>) => {
     setPassword(e.target.value)
   }
 
-  const handlePasswordConfirmChange = (e: any) => {
+  const handlePasswordConfirmChange = (e: ChangeEvent<HTMLInputElement>) => {
     setPasswordConfirm(e.target.value)
-  }
-
-  const validateEmail = (email: string) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-
-    return emailRegex.test(email)
-  }
-
-  const validatePassword = (password: string) => {
-    const hasLowerCase = /[a-z]/.test(password)
-    const hasUpperCase = /[A-Z]/.test(password)
-    const hasNumber = /\d/.test(password)
-    const hasMinLength = password.length >= 6
-
-    return hasLowerCase && hasUpperCase && hasNumber && hasMinLength
   }
 
   return (
     <Wrapper>
       <div>
         <h1>{isLogin ? "Login" : "Sign up"}</h1>
-        <form onSubmit={isLogin ? handleSignIn : handleSignUp}>
+        <form onSubmit={isLogin ? handleSignInAsync : handleSignUpAsync}>
           <label>
             <p>{"Email"}</p>
             <input
@@ -165,7 +169,9 @@ const AuthPage = () => {
               required
               onChange={handleEmailChange}
               placeholder="Enter your email"
-              style={{ outline: error ? "1px solid var(--alert-red)" : "" }}
+              style={{
+                outline: errorMessage ? "1px solid var(--alert-red)" : "",
+              }}
             />
           </label>
           <label>
@@ -175,7 +181,9 @@ const AuthPage = () => {
               required
               onChange={handlePasswordChange}
               placeholder="Enter your password"
-              style={{ outline: error ? "1px solid var(--alert-red)" : "" }}
+              style={{
+                outline: errorMessage ? "1px solid var(--alert-red)" : "",
+              }}
             />
           </label>
           {!isLogin && (
@@ -186,7 +194,9 @@ const AuthPage = () => {
                 required
                 onChange={handlePasswordConfirmChange}
                 placeholder="Enter your password again"
-                style={{ outline: error ? "1px solid var(--alert-red)" : "" }}
+                style={{
+                  outline: errorMessage ? "1px solid var(--alert-red)" : "",
+                }}
               />
             </label>
           )}
@@ -195,14 +205,14 @@ const AuthPage = () => {
             <button type="submit" disabled={!isFormValid}>
               {isLogin ? "Login" : "Create Account"}
             </button>
-            {error && <p className="error-message">{error}</p>}
+            {errorMessage && <p className="error-message">{errorMessage}</p>}
             <span>
               {isLogin ? "Don't have an account?" : "Already have an account?"}
               <button
                 type="button"
                 onClick={() => {
                   setIsLogin(!isLogin)
-                  setError("")
+                  setErrorMessage("")
                 }}
               >
                 {isLogin ? "Sign up" : "Login"}

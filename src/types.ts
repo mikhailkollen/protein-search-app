@@ -16,9 +16,18 @@ export interface SearchState {
   currentUser: User | null
   searchQuery: string
   results: any
-  error: any
+  error?: string
   selectedFilters: Filters | null
   isFiltersModalOpen: boolean
+}
+
+export interface RootState {
+  search: SearchState
+}
+
+export interface UserCredentials {
+  email: string
+  password: string
 }
 
 export interface TabPanelProps {

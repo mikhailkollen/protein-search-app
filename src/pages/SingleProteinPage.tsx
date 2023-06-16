@@ -1,20 +1,20 @@
-import { useCallback, useEffect, useState } from "react"
+import React, { useCallback, useEffect, useState } from "react"
 import { useParams } from "react-router-dom"
 import styled from "styled-components"
-import React from "react"
 
 import Header from "../components/Header"
 import ProteinTabs from "../components/ProteinTabs"
+import { ProteinData } from "../types"
 
 const SingleProteinPage = () => {
-    const { id } = useParams();
+  const { id } = useParams()
 
-  const url = `https://rest.uniprot.org/uniprotkb/${id}`;
-  const [data, setData] = useState({} as any);
+  const url = `https://rest.uniprot.org/uniprotkb/${id}`
+  const [data, setData] = useState({} as ProteinData)
 
   const fetchSingleProtein = useCallback(async () => {
-    const response = await fetch(url);
-    const responseData = await response.json();
+    const response = await fetch(url)
+    const responseData = await response.json()
 
     setData({
       accession: responseData.primaryAccession || "N/A",
@@ -29,12 +29,12 @@ const SingleProteinPage = () => {
       checksum: responseData.sequence?.crc64 || "N/A",
       sequence: responseData.sequence?.value || "N/A",
       organism: responseData.organism?.scientificName || "N/A",
-    });
-  }, [url]);
+    })
+  }, [url])
 
   useEffect(() => {
-    fetchSingleProtein();
-  }, [id, fetchSingleProtein]);
+    fetchSingleProtein()
+  }, [id, fetchSingleProtein])
 
   return (
     <React.Fragment>

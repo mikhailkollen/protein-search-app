@@ -5,7 +5,13 @@ import {
 } from "firebase/auth"
 
 import { auth } from "../../firebase"
-import { Filter, Filters, SearchState } from "../../types"
+import {
+  Filter,
+  Filters,
+  RootState,
+  SearchState,
+  UserCredentials,
+} from "../../types"
 
 const initialState: SearchState = {
   currentUser: null,
@@ -18,35 +24,35 @@ const initialState: SearchState = {
 
 export const signIn = createAsyncThunk(
   "search/signIn",
-  async ({ email, password }: any) => {
-      const userCredential = await signInWithEmailAndPassword(
-        auth,
-        email,
-        password,
-      )
+  async ({ email, password }: UserCredentials) => {
+    const userCredential = await signInWithEmailAndPassword(
+      auth,
+      email,
+      password,
+    )
 
-      const { user } = userCredential
+    const { user } = userCredential
 
-      return { uid: user.uid, email: user.email }
+    return { uid: user.uid, email: user.email }
   },
 )
 
 export const signOut = createAsyncThunk("search/signOut", async () => {
-    await auth.signOut()
+  await auth.signOut()
 })
 
 export const signUp = createAsyncThunk(
   "search/signUp",
-  async ({ email, password }: any) => {
-      const userCredential = await createUserWithEmailAndPassword(
-        auth,
-        email,
-        password,
-      )
+  async ({ email, password }: UserCredentials) => {
+    const userCredential = await createUserWithEmailAndPassword(
+      auth,
+      email,
+      password,
+    )
 
-      const { user } = userCredential
+    const { user } = userCredential
 
-      return { uid: user.uid, email: user.email }
+    return { uid: user.uid, email: user.email }
   },
 )
 
@@ -163,6 +169,6 @@ export const {
   setIsFiltersModalOpen,
 } = searchSlice.actions
 
-export const selectCurrentUser = (state: any) => state.search.currentUser
+export const selectCurrentUser = (state: RootState) => state.search.currentUser
 
 export default searchSlice.reducer
