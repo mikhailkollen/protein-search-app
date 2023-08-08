@@ -222,14 +222,14 @@ const FiltersModal = () => {
       ) : (noFilters ? (
         <p className="filters-loading">{"No filters available"}</p>
       ) : (
-        <form className="filters-form" onSubmit={(e) => handleSubmit(e)}>
+        <form className="filters-form" onSubmit={handleSubmit}>
           <label htmlFor="gene">{"Gene Name"}</label>
           <input
             type="text"
             name="gene"
             id="gene"
             placeholder="Enter gene name"
-            onChange={(e) => handleFilterChange(e)}
+            onChange={handleFilterChange}
           />
           {dynamicFilters.map((filter: any) => {
             return (
@@ -239,7 +239,7 @@ const FiltersModal = () => {
                   name={filter.name}
                   defaultValue=""
                   id={filter.name}
-                  onChange={(e) => handleFilterChange(e)}
+                  onChange={handleFilterChange}
                 >
                   <option value="" disabled>
                     {" "}

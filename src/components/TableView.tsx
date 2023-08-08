@@ -1,8 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { Link } from "react-router-dom"
-import { useVirtualizer } from "@tanstack/react-virtual"
-
 import {
   QueryClient,
   QueryClientProvider,
@@ -16,6 +14,7 @@ import {
   SortingState,
   useReactTable,
 } from "@tanstack/react-table"
+import { useVirtualizer } from "@tanstack/react-virtual"
 import styled from "styled-components"
 
 import { useAppDispatch, useAppSelector } from "../app/hooks"
@@ -390,10 +389,10 @@ const Table = () => {
     count: rows.length,
     getScrollElement: () => tableContainerRef.current,
     estimateSize: () => 34,
-    overscan: 20
-  });
+    overscan: 20,
+  })
 
-  const virtualRows  = virtualizer.getVirtualItems()
+  const virtualRows = virtualizer.getVirtualItems()
   const totalSize = virtualizer.getTotalSize()
   const paddingTop = virtualRows.length > 0 ? virtualRows?.[0]?.start || 0 : 0
 
@@ -516,7 +515,7 @@ const Table = () => {
   )
 }
 
-const TableWithReactQuery = () => {
+const TableView = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <Table />
@@ -592,4 +591,4 @@ const Wrapper = styled.div`
   }
 `
 
-export default TableWithReactQuery
+export default TableView

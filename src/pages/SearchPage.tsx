@@ -5,7 +5,7 @@ import { useAppDispatch, useAppSelector } from "../app/hooks"
 import FiltersIcon from "../assets/FiltersIcon"
 import FiltersModal from "../components/FiltersModal"
 import Header from "../components/Header"
-import TableWithReactQuery from "../components/Table"
+import TableView from "../components/TableView"
 import {
   setFilters,
   setIsFiltersModalOpen,
@@ -71,7 +71,7 @@ const SearchPage = () => {
         </div>
 
         <div className="table-container">
-          <TableWithReactQuery />
+          <TableView />
         </div>
       </main>
     </Wrapper>
