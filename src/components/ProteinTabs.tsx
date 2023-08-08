@@ -1,27 +1,28 @@
-import * as React from "react"
-import { useEffect } from "react"
-import Box from "@mui/material/Box"
-import Tab from "@mui/material/Tab"
-import Tabs from "@mui/material/Tabs"
-import ProtvistaUniprot from "protvista-uniprot"
-import styled from "styled-components"
+import * as React from "react";
+import { useEffect } from "react";
+import Box from "@mui/material/Box";
+import Tab from "@mui/material/Tab";
+import Tabs from "@mui/material/Tabs";
+import ProtvistaUniprot from "protvista-uniprot";
+import styled from "styled-components";
 
-import CopyIcon from "../assets/CopyIcon"
-import { ProteinTabsProps, TabPanelProps } from "../types"
-import Publications from "./Publications"
+
+import { ProteinTabsProps, TabPanelProps } from "../types";
+import Publications from "./Publications";
+import ProteinDetailsTab from "./ProteinDetailsTab";
 
 declare global {
   namespace JSX {
     interface IntrinsicElements {
-      "protvista-uniprot": any
+      "protvista-uniprot": any;
     }
   }
 }
 
-window.customElements.define("protvista-uniprot", ProtvistaUniprot as any)
+window.customElements.define("protvista-uniprot", ProtvistaUniprot as any);
 
 const TabPanel = (props: TabPanelProps) => {
-  const { children, value, index, ...other } = props
+  const { children, value, index, ...other } = props;
 
   return (
     <div
@@ -37,46 +38,45 @@ const TabPanel = (props: TabPanelProps) => {
         </Box>
       )}
     </div>
-  )
-}
+  );
+};
 
 function a11yProps(index: number) {
   return {
     id: `simple-tab-${index}`,
     "aria-controls": `simple-tabpanel-${index}`,
-  }
+  };
 }
 
 const ProteinTabs: React.FC<ProteinTabsProps> = ({ data }) => {
-  const [value, setValue] = React.useState(0)
+  const [value, setValue] = React.useState(0);
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
-    event.target!
-    setValue(newValue)
-  }
-
-  const [isCopied, setIsCopied] = React.useState(false)
-  const [publications, setPublications] = React.useState([]) as any
+    event.target!;
+    setValue(newValue);
+  };
+  
+  const [publications, setPublications] = React.useState([]) as any;
 
   const fetchPublications = async () => {
     if (!data.accession) {
-      return
+      return;
     }
 
     const response = await fetch(
-      `https://rest.uniprot.org/uniprotkb/${data.accession}/publications`,
-    )
+      `https://rest.uniprot.org/uniprotkb/${data.accession}/publications`
+    );
 
-    const dataResponse = await response.json()
+    const dataResponse = await response.json();
 
-    setPublications(dataResponse.results)
+    setPublications(dataResponse.results);
 
-    return publications
-  }
+    return publications;
+  };
 
   useEffect(() => {
-    fetchPublications()
-  }, [data])
+    fetchPublications();
+  }, [data]);
 
   return (
     <Box sx={{ width: "100%" }}>
@@ -84,7 +84,7 @@ const ProteinTabs: React.FC<ProteinTabsProps> = ({ data }) => {
         <Tabs
           value={value}
           onChange={handleChange}
-          aria-label="basic tabs example"
+          aria-label="protein details tabs"
           TabIndicatorProps={{
             style: {
               backgroundColor: "var(--active-blue)",
@@ -122,41 +122,7 @@ const ProteinTabs: React.FC<ProteinTabsProps> = ({ data }) => {
         </Tabs>
       </Box>
       <TabPanel value={value} index={0}>
-        <h2 className="title">{"Sequence"}</h2>
-        <div className="flex-container">
-          <div className="column">
-            <div>
-              <h3 className="data-title">{"Length"}</h3>
-              <p className="data-text">{data.length}</p>
-            </div>
-            <div>
-              <h3 className="data-title">{"Mass"}</h3>
-              <p className="data-text">{data.mass}</p>
-            </div>
-          </div>
-          <div className="column">
-            <div>
-              <h3 className="data-title">{"Last Updated"}</h3>
-              <p className="data-text">{data.lastUpdated}</p>
-            </div>
-            <div>
-              <h3 className="data-title">{"Checksum"}</h3>
-              <p className="data-text">{data.checksum}</p>
-            </div>
-          </div>
-        </div>
-        <div className="sequence-container">
-          <p className="data-text">{data.sequence}</p>
-          <button
-            className="copy-btn"
-            onClick={() => {
-              navigator.clipboard.writeText(data.sequence)
-              setIsCopied(true)
-            }}
-          >
-            <CopyIcon /> <span>{isCopied ? "Copied" : "Copy"}</span>
-          </button>
-        </div>
+        <ProteinDetailsTab {...data} />
       </TabPanel>
       <TabPanel value={value} index={1}>
         <div>
@@ -167,8 +133,8 @@ const ProteinTabs: React.FC<ProteinTabsProps> = ({ data }) => {
         <Publications publications={publications} />
       </TabPanel>
     </Box>
-  )
-}
+  );
+};
 
 const Wrapper = styled.section`
   display: flex;
@@ -229,6 +195,6 @@ const Wrapper = styled.section`
       width: 100%;
     }
   }
-`
+`;
 
-export default ProteinTabs
+export default ProteinTabs;

@@ -7,6 +7,10 @@ export interface Filter {
 
 export type Filters = Filter[]
 
+export interface ProteinTabsProps {
+  data: ProteinData
+}
+
 export interface User {
   uid: string
   email: string | null
