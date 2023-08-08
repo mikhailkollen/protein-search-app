@@ -1,35 +1,79 @@
-# final-task
-Quantori JS School final task
+Protein Search App
+==================
 
-**Start date** - Wed 17 May
+This app allows you to search for proteins and explore detailed information about them, including visualizations of their data and related publications.
 
-**End date** - Wed 31 May
+Getting Started
+---------------
 
-## Description
-Q-1 Search is a search system through proteins using UniProt API. This is a lite and redesigned website of https://www.uniprot.org/
-You always can follow the link above to check how it works.
+To access the app, you can visit the following link: [Protein Search App](https://protein-search-app.netlify.app/search)
 
-Design - [Figma](https://www.figma.com/file/PB1YUYKosRJtLkBqoI395O/Untitled?node-id=0-1&t=bOmEqh3pAUdZvcl4-0)
-The design is just a mockup. it means if you choose some UI library you shouldn't spend a lot of time overriding styles, just try to do something similar to the design. Your goal is to develop a working application.  
+### Test User
 
-Tasks - [Trello](https://trello.com/b/p6E2IUfP/final-task)
-Tasks that should be done are placed in Trello board, and each task has a priority and description. You should start with high-priority tasks and when they are done you can go to the medium prioritized and then to the low prioritized tasks. When you start working on some task you should move the task to the `In Progress` column, when the task is done you need to move it to the `Done` column. if you think that you need to create more tasks - go ahead.
+You can use the following test user credentials to log in and explore the app:
 
-You are allowed to use any libraries in react ecosystem (just to clarify). You can compare libraries on [npm trends](https://npmtrends.com/) site. If you have some doubts feel free to ask your mentor or write your question in the course chat.
+-   Login: <test1@gmail.com>
+-   Password: PassWord1
 
-That would be awesome if you deploy your app and attach this link to the pull request.
+Pages
+-----
 
-## How to complete the task
- - create Trello account and copy the Trello board [How to copy Trello board]([https://trello.com/b/p6E2IUfP/final-task](https://support.atlassian.com/trello/docs/copying-cards-lists-or-boards/))
- - make a fork of this repository 
- - create and checkout to the new `final-task` branch
- - start work on tasks
- - for each task create a new branch. For example, `feat/add-auth-page` for the Add Auth Page task
- - create and then merge pull request to the `final-task` when a task is done 
- - create a pull request  to the `main` branch from the `final-task` branch and submit your homework
+The Protein Search App consists of the following pages:
 
-## How to start project
-1. Install dependencies 
-Run `npm i` or `npm install` from the root directory
-2. Start the project
-Run `npm run dev`
+### Main Page
+
+The main landing page of the app. Users can log in or sign up to access the search functionality and explore proteins.
+
+### Auth Page
+
+The authentication page is where users can log in or sign up to access the app's features.
+
+### Search Page
+
+The search page allows users to search for proteins using the provided input. Users can sort the search results by clicking on the table header cells and apply dynamic filters to refine their search.
+
+### Single Protein Page
+
+This page provides detailed information about a single protein, including visualizations of its data and related publications. Users can navigate to this page from the search results.
+
+### Error Page
+
+In case of any errors or unauthorized access attempts, users will be directed to the error page, where appropriate feedback and guidance will be provided.
+
+Functionality
+-------------
+
+The app offers a range of powerful functionalities:
+
+-   Authentication: Users can log in or sign up using their email and password via Firebase authentication.
+
+-   Routing: The app uses React Router for smooth navigation between different pages.
+
+-   State Management: State is managed using Redux, ensuring a consistent and reliable experience throughout the app.
+
+-   Search: Users can search for proteins using the input field. The app provides an intuitive interface to find the desired proteins.
+
+-   Sorting: Users can sort search results by clicking on the table header cells, making it easier to organize and analyze data.
+
+-   Filtering: Dynamic filters are available, allowing users to refine search results based on various criteria.
+
+-   Detailed Protein View: The single protein page offers comprehensive information about a protein, including visualizations and related publications.
+
+-   Preserved State: The app preserves the search query, sorting options, and applied filters even when users refresh the page. Unauthorized users attempting to access certain pages will be redirected after logging in or signing up.
+
+-   Infinite Scroll and Virtualization: The search results table utilizes infinite scroll and virtualization techniques for smoother performance, even with a large number of search results.
+
+How to Use
+----------
+
+1.  Log in or sign up using the provided credentials.
+2.  Access the search page to search for proteins.
+3.  Use the sorting and filtering options to refine your search.
+4.  Click on a protein to view detailed information on a separate page.
+
+Support and Feedback
+--------------------
+
+If you encounter any issues, have questions, or would like to provide feedback, please feel free to contact me.
+
+I hope you find the app valuable and enjoy exploring the world of proteins!
