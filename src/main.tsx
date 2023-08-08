@@ -1,3 +1,4 @@
+import "./css-reset.css"
 import "./index.css"
 
 import React from "react"
