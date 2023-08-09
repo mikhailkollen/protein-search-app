@@ -23,10 +23,6 @@
                         "group":["../../**/src/"]
                     },
                     {
-                        "message": "Do not import from Material-UI directly, use UI",
-                        "group": ["@material-ui/*", "@mui/*"]
-                    },
-                    {
                         "message": "Do not import from @emotion directly, use UI",
                         "group": ["@emotion/*"]
                     }

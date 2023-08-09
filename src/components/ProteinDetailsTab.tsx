@@ -1,13 +1,13 @@
-import { useState } from "react";
-import CopyIcon from "../assets/CopyIcon";
-import { ProteinData } from "../types";
+import { useState } from "react"
 
+import CopyIcon from "../assets/CopyIcon"
+import { ProteinData } from "../types"
 
 const ProteinDetailsTab = (data: ProteinData) => {
-  const [isCopied, setIsCopied] = useState(false);
+  const [isCopied, setIsCopied] = useState(false)
 
   return (
-    <>
+    <React.Fragment>
       <h2 className="title">{"Sequence"}</h2>
       <div className="flex-container">
         <div className="column">
@@ -36,15 +36,15 @@ const ProteinDetailsTab = (data: ProteinData) => {
         <button
           className="copy-btn"
           onClick={() => {
-            navigator.clipboard.writeText(data.sequence);
-            setIsCopied(true);
+            navigator.clipboard.writeText(data.sequence)
+            setIsCopied(true)
           }}
         >
           <CopyIcon /> <span>{isCopied ? "Copied" : "Copy"}</span>
         </button>
       </div>
-    </>
-  );
-};
+    </React.Fragment>
+  )
+}
 
-export default ProteinDetailsTab;
+export default ProteinDetailsTab
