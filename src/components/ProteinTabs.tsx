@@ -40,6 +40,8 @@ function a11yProps(index: number) {
 const ProteinTabs: React.FC<ProteinTabsProps> = ({ data }) => {
   const [value, setValue] = React.useState(0)
 
+  const { accession } = data
+
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     event.target!
     setValue(newValue)
@@ -48,21 +50,21 @@ const ProteinTabs: React.FC<ProteinTabsProps> = ({ data }) => {
   const [publications, setPublications] = React.useState([]) as any
 
   const fetchPublications = React.useCallback(async () => {
-    if (!data.accession) {
+    if (!accession) {
       return
     }
 
     const response = await fetch(
-      `https://rest.uniprot.org/uniprotkb/${data.accession}/publications`,
+      `https://rest.uniprot.org/uniprotkb/${accession}/publications`,
     )
 
     const dataResponse = await response.json()
 
-    console.log(dataResponse.results);
     setPublications(dataResponse.results)
+    console.log(dataResponse.results)
 
-    return publications
-  }, [data.accession, publications])
+    return dataResponse.results
+  }, [accession])
 
   useEffect(() => {
     fetchPublications()

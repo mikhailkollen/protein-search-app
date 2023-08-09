@@ -2,122 +2,105 @@ import { Link } from "react-router-dom"
 import styled from "styled-components"
 
 import ExternalLinkIcon from "../assets/ExternalLinkIcon"
+import {
+  PublicationAuthorProps,
+  PublicationProps,
+  PublicationsProps,
+} from "../types"
 
-const Publications = ({ publications }: any) => {
+const PublicationAuthor = ({ authors }: PublicationAuthorProps) => {
+  if (!authors) {
+    return null
+  }
+
+  const MAX_AUTHORS = 15
+
+  const authorList =
+    authors.length > MAX_AUTHORS
+      ? authors.slice(0, MAX_AUTHORS).join(", ") + "..."
+      : authors.join(", ")
+
+  return <span>{authorList}</span>
+}
+
+const Publication = ({ publication }: PublicationProps) => {
+  if (!publication) {
+    return null
+  }
+
+  const citation = publication.citation
+  const references = publication.references?.[0]
+
+  return (
+    <div className="publication-container">
+      <h3 className="publication-title">{citation.title}</h3>
+      <p className="publication-authors">
+        <PublicationAuthor authors={citation.authors} />
+      </p>
+      <p>
+        <span className="subtitle-grey-text">{"Categories: "}</span>
+        {references?.sourceCategories?.join(", ")}
+      </p>
+      <p>
+        <span className="subtitle-grey-text">{"Cited for: "}</span>
+        {references?.referencePositions?.join(", ")}
+      </p>
+      <p>
+        <span className="subtitle-grey-text">{"Source: "}</span>
+        <span>{references?.source?.name}</span>
+      </p>
+      {citation.citationCrossReferences?.[0] && (
+        <div className="publication-links-container">
+          <Link
+            className="publication-link"
+            to={`https://pubmed.ncbi.nlm.nih.gov/${citation.citationCrossReferences[0].id}`}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {"PubMed "}
+            {<ExternalLinkIcon />}
+          </Link>{" "}
+          <Link
+            className="publication-link"
+            to={`https://europepmc.org/article/MED/${citation.citationCrossReferences[0].id}`}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {"Europe PMC "}
+            {<ExternalLinkIcon />}
+          </Link>{" "}
+          <Link
+            className={`publication-link ${
+              !citation.citationCrossReferences[1]?.id && "disabled"
+            }`}
+            to={
+              citation.citationCrossReferences[1]?.id
+                ? `https://dx.doi.org/${citation.citationCrossReferences[1].id}`
+                : ""
+            }
+            onClick={(event) => {
+              if (!citation.citationCrossReferences[1]?.id) {
+                event.preventDefault()
+              }
+            }}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {`${citation.journal} :${citation.firstPage}-${citation.lastPage} (${citation.publicationDate})`}{" "}
+            {<ExternalLinkIcon />}
+          </Link>{" "}
+        </div>
+      )}
+    </div>
+  )
+}
+
+const Publications = ({ publications }: PublicationsProps) => {
   return (
     <Wrapper>
-      {publications &&
-        publications.map((publication: any) => (
-          <div key={publication.citation.id} className="publication-container">
-            <h3 className="publication-title">{publication.citation.title}</h3>
-            <p className="publication-authors">
-              {publication.citation.authors
-                ? (publication.citation.authors.length > 15
-                  ? publication.citation.authors
-                      .slice(0, 15)
-                      .map((author: string, index: number) => {
-                        return index ===
-                          publication.citation.authors.slice(0, 15).length -
-                            1 ? (
-                          <span key={index}>
-                            {author}
-                            {"..."}
-                          </span>
-                        ) : (
-                          <span key={index}>
-                            {author}
-                            {", "}
-                          </span>
-                        )
-                      })
-                  : publication.citation.authors.map(
-                      (author: string, index: number) => {
-                        return index ===
-                          publication.citation.authors.length - 1 ? (
-                          <span key={index}>{author}</span>
-                        ) : (
-                          <span key={index}>
-                            {author}
-                            {", "}
-                          </span>
-                        )
-                      },
-                    ))
-                : ""}
-            </p>
-            <p>
-              <span className="subtitle-grey-text">{"Categories: "}</span>
-              {publication.references &&
-              publication.references[0] &&
-              publication.references[0].sourceCategories
-                ? publication.references[0].sourceCategories.join(", ")
-                : ""}
-            </p>
-            <p>
-              <span className="subtitle-grey-text">{"Cited for: "}</span>
-              {publication.references &&
-              publication.references[0] &&
-              publication.references[0].referencePositions
-                ? publication.references[0].referencePositions.join(", ")
-                : ""}
-            </p>
-            <p>
-              <span className="subtitle-grey-text">{"Source: "}</span>
-              <span>
-                {publication.references &&
-                  publication.references[0] &&
-                  publication.references[0].source.name}
-              </span>
-            </p>
-
-            {publication.citation.citationCrossReferences &&
-            publication.citation.citationCrossReferences[0] ? (
-              <div className="publication-links-container">
-                <Link
-                  className="publication-link"
-                  to={`https://pubmed.ncbi.nlm.nih.gov/${publication.citation.citationCrossReferences[0].id}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {"PubMed "}
-                  {<ExternalLinkIcon />}
-                </Link>{" "}
-                <Link
-                  className="publication-link"
-                  to={`https://europepmc.org/article/MED/${publication.citation.citationCrossReferences[0].id}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {"Europe PMC "}
-                  {<ExternalLinkIcon />}
-                </Link>{" "}
-                <Link
-                  className={`publication-link ${
-                    !publication.citation.citationCrossReferences[1]?.id &&
-                    "disabled"
-                  }`}
-                  to={
-                    publication.citation?.citationCrossReferences[1]?.id
-                      ? `https://dx.doi.org/${publication.citation.citationCrossReferences[1].id}`
-                      : ""
-                  }
-                  onClick={(event) => {
-                    if (!publication.citation.citationCrossReferences[1]?.id) {
-                      event.preventDefault()
-                    }
-                  }}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {`${publication.citation.journal} :${publication.citation.firstPage}-${publication.citation.lastPage} (${publication.citation.publicationDate})`}{" "}
-                  {<ExternalLinkIcon />}
-                </Link>{" "}
-              </div>
-            ) : (
-              ""
-            )}
-          </div>
-        ))}
+      {publications?.map((publication) => (
+        <Publication key={publication.citation.id} publication={publication} />
+      ))}
     </Wrapper>
   )
 }
