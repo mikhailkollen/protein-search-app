@@ -56,3 +56,43 @@ export interface ProteinData {
 export interface ProteinTabsProps {
   data: ProteinData
 }
+
+export interface CitationCrossReference {
+  id: string
+}
+
+export interface Citation {
+  id: string
+  title: string
+  authors: string[]
+  journal: string
+  firstPage: string
+  lastPage: string
+  publicationDate: string
+  citationCrossReferences: CitationCrossReference[]
+}
+
+export interface Reference {
+  source: {
+    name: string
+  }
+  sourceCategories: string[]
+  referencePositions: string[]
+}
+
+export interface Publication {
+  citation: Citation
+  references: Reference[]
+}
+
+export interface PublicationsProps {
+  publications: Publication[]
+}
+
+export interface PublicationProps {
+  publication: Publication
+}
+
+export interface PublicationAuthorProps {
+  authors: string[] | undefined
+}
