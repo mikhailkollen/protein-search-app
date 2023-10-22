@@ -34,6 +34,7 @@ const SingleProteinPage = () => {
 
   useEffect(() => {
     fetchSingleProtein()
+    document.title = `${id} / UniProtKB`
   }, [id, fetchSingleProtein])
 
   return (
