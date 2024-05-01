@@ -1,16 +1,16 @@
-import React from "react"
-import ProtvistaUniprot from "protvista-uniprot"
+import React from "react";
+import ProtvistaUniprot from "protvista-uniprot";
 
-window.customElements.define("protvista-uniprot", ProtvistaUniprot as any)
+window.customElements.define("protvista-uniprot", ProtvistaUniprot as any);
 
 const ProtvistaUniprotTab: React.FC<{ data: { accession: string } }> = ({
   data,
 }) => {
   return (
     <div>
-      <ProtvistaUniprot accession={data.accession} />
+      <protvista-uniprot accession={data.accession} />
     </div>
-  )
-}
+  );
+};
 
-export default ProtvistaUniprotTab
+export default ProtvistaUniprotTab;

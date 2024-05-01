@@ -1,7 +1,8 @@
 {
     "root": true,
-    "extends": ["react-config-r13v"],
-
+    "extends": [
+        "react-config-r13v"
+    ],
     "parserOptions": {
         "project": "tsconfig.json",
         "ecmaFeatures": {
@@ -20,11 +21,15 @@
                 "patterns": [
                     {
                         "message": "do not import from sibling package",
-                        "group":["../../**/src/"]
+                        "group": [
+                            "../../**/src/"
+                        ]
                     },
                     {
                         "message": "Do not import from @emotion directly, use UI",
-                        "group": ["@emotion/*"]
+                        "group": [
+                            "@emotion/*"
+                        ]
                     }
                 ]
             }
@@ -49,7 +54,19 @@
                 ]
             }
         ],
-        "@typescript-eslint/consistent-type-definitions": ["warn", "interface"],
+        "unicorn/filename-case": [
+            "error",
+            {
+                "case": "pascalCase",
+                "ignore": [
+                    "*.ts"
+                ]
+            }
+        ],
+        "@typescript-eslint/consistent-type-definitions": [
+            "warn",
+            "interface"
+        ],
         "@kyleshevlin/prefer-custom-hooks": "off",
         "react/react-in-jsx-scope": "off",
         "unicorn/prefer-object-from-entries": "off",
@@ -61,7 +78,10 @@
     },
     "overrides": [
         {
-            "files": ["./src/ui/**/*.ts", "./src/ui/**/*.tsx"],
+            "files": [
+                "./src/ui/**/*.ts",
+                "./src/ui/**/*.tsx"
+            ],
             "rules": {
                 "no-restricted-imports": "off"
             }

@@ -1,17 +1,17 @@
-import * as React from "react"
-import { useEffect } from "react"
-import Box from "@mui/material/Box"
-import Tab from "@mui/material/Tab"
-import Tabs from "@mui/material/Tabs"
-import styled from "styled-components"
+import * as React from "react";
+import { useEffect } from "react";
+import Box from "@mui/material/Box";
+import Tab from "@mui/material/Tab";
+import Tabs from "@mui/material/Tabs";
+import styled from "styled-components";
 
-import { ProteinTabsProps, TabPanelProps } from "../types"
-import ProteinDetailsTab from "./ProteinDetailsTab"
-import ProtvistaUniprotTab from "./ProtvistaUniprotTab"
-import Publications from "./Publications"
+import { ProteinTabsProps, TabPanelProps } from "../types";
+import ProteinDetailsTab from "./ProteinDetailsTab";
+import ProtvistaUniprotTab from "./ProtvistaUniprotTab";
+import Publications from "./Publications";
 
 const TabPanel = (props: TabPanelProps) => {
-  const { children, value, index, ...other } = props
+  const { children, value, index, ...other } = props;
 
   return (
     <div
@@ -27,48 +27,47 @@ const TabPanel = (props: TabPanelProps) => {
         </Box>
       )}
     </div>
-  )
-}
+  );
+};
 
 function a11yProps(index: number) {
   return {
     id: `simple-tab-${index}`,
     "aria-controls": `simple-tabpanel-${index}`,
-  }
+  };
 }
 
 const ProteinTabs: React.FC<ProteinTabsProps> = ({ data }) => {
-  const [value, setValue] = React.useState(0)
+  const [value, setValue] = React.useState(0);
 
-  const { accession } = data
+  const { accession } = data;
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
-    event.target!
-    setValue(newValue)
-  }
+    event.target!;
+    setValue(newValue);
+  };
 
-  const [publications, setPublications] = React.useState([]) as any
+  const [publications, setPublications] = React.useState([]) as any;
 
   const fetchPublications = React.useCallback(async () => {
     if (!accession) {
-      return
+      return;
     }
 
     const response = await fetch(
-      `https://rest.uniprot.org/uniprotkb/${accession}/publications`,
-    )
+      `https://rest.uniprot.org/uniprotkb/${accession}/publications`
+    );
 
-    const dataResponse = await response.json()
+    const dataResponse = await response.json();
 
-    setPublications(dataResponse.results)
-    console.log(dataResponse.results)
+    setPublications(dataResponse.results);
 
-    return dataResponse.results
-  }, [accession])
+    return dataResponse.results;
+  }, [accession]);
 
   useEffect(() => {
-    fetchPublications()
-  }, [data, fetchPublications])
+    fetchPublications();
+  }, [data, fetchPublications]);
 
   return (
     <Box sx={{ width: "100%" }}>
@@ -123,8 +122,8 @@ const ProteinTabs: React.FC<ProteinTabsProps> = ({ data }) => {
         <Publications publications={publications} />
       </TabPanel>
     </Box>
-  )
-}
+  );
+};
 
 const Wrapper = styled.section`
   display: flex;
@@ -185,6 +184,6 @@ const Wrapper = styled.section`
       width: 100%;
     }
   }
-`
+`;
 
-export default ProteinTabs
+export default ProteinTabs;
